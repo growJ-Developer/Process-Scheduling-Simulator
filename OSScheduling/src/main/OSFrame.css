@@ -1,0 +1,59 @@
+
+*{
+	-fx-font-size:10pt;
+	-fx-font-family:"NanumGothic" !important;
+	
+}
+
+
+
+.backgroundPane{
+	-fx-background-color:#ffffff;
+}
+
+.toolBar{
+	-fx-background-color:gray;
+}
+
+.gridPane{
+	-fx-background-color:#ffffff;
+}
+
+.anchorPane{
+	-fx-background-color:#ffffff;
+}
+
+.horizonBar{
+    -fx-fill:#2B84D2;
+    -fx-border-style:none;
+    -fx-stroke-width:0;
+}
+
+.selectBox, .inputBox{
+
+}
+
+.ganttPane{
+	-fx-background-color:#E5E5E5;
+}
+
+.column-header{
+	-fx-background-color:#E5E5E5;
+}
+
+.listTable{
+}
+
+.list-control-btn{
+	-fx-border-radius:5em;
+	-fx-background-radius:5em;
+	-fx-stroke-width:0;
+}
+
+.list-sort-btn{
+	-fx-border-radius:0.5em;
+	-fx-background-radius:0.5em;
+	-fx-background-color:#E5E5E5 !important;
+}
+
+@import "bootstrapfx.scss"

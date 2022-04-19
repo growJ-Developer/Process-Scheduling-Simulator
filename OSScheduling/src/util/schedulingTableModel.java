@@ -5,7 +5,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 
 /* 스케줄링 테이블 모델 클래스 */
 public class schedulingTableModel {
-	private static int processCount = 0;
+	private static int processCount = 1;
 	private final IntegerProperty processNo;
 	private final IntegerProperty arrivalTime;
 	private final IntegerProperty burstTime;

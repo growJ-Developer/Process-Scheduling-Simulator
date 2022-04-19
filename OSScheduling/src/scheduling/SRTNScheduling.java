@@ -1,21 +1,38 @@
 package scheduling;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import util.coreUtil;
 import util.workSection;
 
 public class SRTNScheduling extends scheduling{
-	/* 싱글톤 패턴으로 지정합니다 */
-	private static SRTNScheduling singletone = new SRTNScheduling();
-	private boolean isRunning = false;
+	private boolean isRunning;
 	private Thread mThread;
-	private ArrayList<workSection> workList = new ArrayList<>();
+	private PriorityQueue<workSection> workList;
+	private PriorityQueue<workSection> readyQueue;
+	private ArrayList<workSection> endList;
 	private coreUtil coreSet;
+	private workSection nowWork;
+	private int nowTime;
 	
 	/* SRTN Scheduling을 수행합니다 */
 	public SRTNScheduling() {
-		//super();
+		isRunning = false;
+		nowWork = null;
+		workList = new PriorityQueue<>();
+		readyQueue = new PriorityQueue<workSection>((o1, o2) -> {
+			if(o1.getOverWorkCnt() > o2.getOverWorkCnt()) 		return 1;
+			else if(o1.getOverWorkCnt() < o2.getOverWorkCnt()) 	return -1;
+			else if(o1.getWorkId() > o2.getWorkId())			return 1;
+			else if(o1.getWorkId() < o2.getWorkId())			return -1;
+			else return 0;
+		});
+		endList = new ArrayList<>();
+		nowTime = 0;
 	}
 	
 	@Override
@@ -23,27 +40,80 @@ public class SRTNScheduling extends scheduling{
 		clear();
 		
 		mThread = new Thread(() -> {
+			System.out.println("SRTNScheduling Start");
 			try {
 				/* 스케쥴링 작업을 수행합니다. */
+				rawRunScheduling();
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
 				clear();
+				System.out.println("SRTNScheduling Stop");
 			}
 		});
-		
+		mThread.start();
+	}
+	
+	public void rawRunScheduling() throws Exception{		
+		while(isRunning) {
+			if(nowTime >= 31) 	isRunning = false;
+			else 				nowTime++;
+			
+			/* ReadyQueue를 설정합니다 */
+			setReadyQueue();
+			
+			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
+			if(readyQueue.size() != 0) 	nowWork = getBestWork();
+			
+			if(nowWork != null) {
+				System.out.println(nowTime + " / " + nowWork);
+			} else {
+				System.out.println(nowTime + " / null");
+			}
+			
+			
+			/* 작업을 진행한뒤, 잔여시간을 체크하여, endList로 옮깁니다 */
+			if(nowWork != null) {
+				nowWork.setOverWorkCnt(nowWork.getOverWorkCnt() - coreSet.getWorkByCore());
+				if(nowWork.getOverWorkCnt() <= 0) {
+					endList.add(nowWork);
+					nowWork = null;
+				}
+			}
+			
+			/* 1초 간격으로 실행합니다 */
+			mThread.sleep(1000);
+		}
+	}
+	
+	/* 최적의 작업을 찾습니다 */
+	@Override
+	public workSection getBestWork() {
+		if (nowWork != null)	readyQueue.add(nowWork);		// 현재 작업 반영
+		return readyQueue.poll();
+	}
+	
+	/* 도착한 작업들을 Queue에 넣습니다 */
+	@Override
+	public void setReadyQueue() {
+		for(int index = 0; index < workList.size(); index++) {
+			workSection work = workList.poll();
+			if(work.getArrivalTime() <= nowTime) {
+				readyQueue.add(work);
+			} else {
+				workList.add(work);
+			}
+		}
 	}
 	
 	@Override
-	public void setWorkSection(ArrayList<workSection> workList) {
-		// TODO Auto-generated method stub
-		
+	public void setWorkSection(PriorityQueue<workSection> workList) {
+		this.workList = workList;
 	}
 	
 	@Override
-	public ArrayList<workSection> getWorkSection() {
-		// TODO Auto-generated method stub
-		return null;
+	public PriorityQueue<workSection> getWorkSection() {
+		return this.workList;
 	}
 	
 	@Override
@@ -53,12 +123,12 @@ public class SRTNScheduling extends scheduling{
 	
 	@Override
 	public void setRunning(boolean isRunning) {
-		// TODO Auto-generated method stub
+		this.isRunning = isRunning;
 	}
 	
 	@Override
 	public boolean isRunning() {
-		return false;
+		return this.isRunning;
 	}
 	
 	@Override
@@ -67,25 +137,13 @@ public class SRTNScheduling extends scheduling{
 	}
 	
 	@Override
-	public scheduling getInstance() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
 	public void setCoreInfo(coreUtil coreSet) {
-		if(!isRunning()) {
-			/* 실행중이 아닐 때에만, 코어 정보를 변경합니다 */
-			this.coreSet = coreSet;
-		}
-		// TODO Auto-generated method stub
-		
+		this.coreSet = coreSet;	
 	}
 	
 	@Override
 	public coreUtil getCoreInfo() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.coreSet;
 	}
 	
 }

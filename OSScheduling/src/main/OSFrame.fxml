@@ -65,55 +65,55 @@
             <Text layoutX="20.0" layoutY="17.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Ready Queue" wrappingWidth="100.21630859375" />
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="570.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="580.0" layoutY="17.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Now Running" wrappingWidth="100.21630859375" />
-            <TableView editable="true" layoutX="10.0" layoutY="91.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="316.0" prefWidth="485.0">
+            <TableView fx:id="listTable" editable="true" layoutX="10.0" layoutY="91.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="316.0" prefWidth="485.0" styleClass="listTable">
                <columns>
-                  <TableColumn editable="false" prefWidth="44.0" resizable="false" sortable="false" styleClass="column-header" text="No." />
-                  <TableColumn editable="false" prefWidth="74.0" resizable="false" sortable="false" styleClass="column-header" text="Arrival Time" />
-                  <TableColumn editable="false" prefWidth="66.0" resizable="false" sortable="false" styleClass="column-header" text="Burst Time" />
-                  <TableColumn editable="false" prefWidth="84.0" resizable="false" sortable="false" styleClass="column-header" text="Waiting Time" />
-                  <TableColumn editable="false" prefWidth="103.0" resizable="false" sortable="false" styleClass="column-header" text="Turnaround Time" />
-                  <TableColumn editable="false" prefWidth="113.0" resizable="false" sortable="false" styleClass="column-header" text="Normalized Time" />
+                  <TableColumn fx:id="processNoColumn" editable="false" prefWidth="44.0" resizable="false" sortable="false" styleClass="column-header" text="No." />
+                  <TableColumn fx:id="arrivalTimeColumn" editable="false" prefWidth="74.0" resizable="false" sortable="false" styleClass="column-header" text="Arrival Time" />
+                  <TableColumn fx:id="burstTimeColumn" editable="false" prefWidth="66.0" resizable="false" sortable="false" styleClass="column-header" text="Burst Time" />
+                  <TableColumn fx:id="waitingTimeColumn" editable="false" prefWidth="84.0" resizable="false" sortable="false" styleClass="column-header" text="Waiting Time" />
+                  <TableColumn fx:id="turnaroundTimeColumn" editable="false" prefWidth="103.0" resizable="false" sortable="false" styleClass="column-header" text="Turnaround Time" />
+                  <TableColumn fx:id="normalizedTimeColumn" editable="false" prefWidth="113.0" resizable="false" sortable="false" styleClass="column-header" text="Normalized Time" />
                </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
             </TableView>
-            <Button layoutX="499.0" layoutY="319.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="↑">
+            <Button fx:id="toUpBtn" layoutX="499.0" layoutY="319.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="↑">
                <styleClass>
                   <String fx:value="btn-default" />
                   <String fx:value="list-sort-btn" />
                </styleClass></Button>
-            <Button layoutX="499.0" layoutY="366.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="↓">
+            <Button fx:id="toDownBtn" layoutX="499.0" layoutY="366.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="↓">
                <styleClass>
                   <String fx:value="list-sort-btn" />
                   <String fx:value="btn-default" />
                </styleClass></Button>
-            <Button layoutX="515.0" layoutY="171.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&lt;&lt;">
+            <Button fx:id="toLeftBtn" layoutX="515.0" layoutY="171.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&lt;&lt;">
                <styleClass>
                   <String fx:value="list-control-btn" />
                   <String fx:value="btn-info" />
                </styleClass></Button>
-            <Button layoutX="515.0" layoutY="223.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&lt;&lt;">
+            <Button fx:id="toRightBtn" layoutX="515.0" layoutY="223.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&lt;&lt;">
                <styleClass>
                   <String fx:value="btn-info" />
                   <String fx:value="list-control-btn" />
                </styleClass></Button>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="570.0" layoutY="89.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="580.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Scheduling Type" wrappingWidth="130.21630859375" />
-            <TextField layoutX="570.0" layoutY="196.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="160.0" styleClass="inputBox" />
+            <TextField fx:id="arrivalTimeInput" layoutX="570.0" layoutY="196.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="160.0" styleClass="inputBox" />
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="570.0" layoutY="164.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="580.0" layoutY="181.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Arrival Time" wrappingWidth="100.21630859375" />
-            <TextField layoutX="570.0" layoutY="274.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="160.0" styleClass="inputBox" />
+            <TextField fx:id="burstTimeInput" layoutX="570.0" layoutY="274.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="160.0" styleClass="inputBox" />
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="570.0" layoutY="242.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="580.0" layoutY="259.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Burst Time" wrappingWidth="100.21630859375" />
-            <TextField layoutX="570.0" layoutY="352.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="160.0" styleClass="inputBox" />
+            <TextField fx:id="timeQuantumInput" layoutX="570.0" layoutY="352.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="160.0" styleClass="inputBox" />
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="570.0" layoutY="320.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="580.0" layoutY="337.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Time Quantum" wrappingWidth="100.21630859375" />
             <Line endX="-29.0" endY="336.0" layoutX="778.0" layoutY="67.0" startX="-29.0" startY="22.0" />
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="769.0" layoutY="89.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="779.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Arrival Time" wrappingWidth="100.21630859375" />
-            <Button layoutX="770.0" layoutY="352.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" styleClass="btn-info" text="Start" />
-            <SplitMenuButton layoutX="570.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="160.0" text="Scheduling Type">
+            <Button fx:id="startBtn" layoutX="770.0" layoutY="352.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" styleClass="btn-info" text="Start" />
+            <SplitMenuButton fx:id="schedulingTypeSelect" layoutX="570.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="160.0" text="Scheduling Type">
               <items>
                 <MenuItem mnemonicParsing="false" text="FCFS" />
                 <MenuItem mnemonicParsing="false" text="Round-Robin" />
@@ -126,7 +126,7 @@
                   <String fx:value="split-menu-btn" />
                </styleClass>
             </SplitMenuButton>
-            <SplitMenuButton layoutX="770.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="PCore">
+            <SplitMenuButton fx:id="pCoreSelect" layoutX="770.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="PCore">
                <items>
                   <MenuItem mnemonicParsing="false" text="Action 1" />
                   <MenuItem mnemonicParsing="false" text="Action 2" />
@@ -136,7 +136,7 @@
                   <String fx:value="split-menu-btn-default" />
                </styleClass>
             </SplitMenuButton>
-            <SplitMenuButton layoutX="860.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="ECore">
+            <SplitMenuButton fx:id="eCoreSelect" layoutX="860.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="ECore">
                <items>
                   <MenuItem mnemonicParsing="false" text="Action 1" />
                   <MenuItem mnemonicParsing="false" text="Action 2" />

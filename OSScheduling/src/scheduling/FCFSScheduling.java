@@ -74,6 +74,7 @@ public class FCFSScheduling extends scheduling{
 			System.out.println(nowWork);
 			System.out.println("one");
 			System.out.println("three");
+			System.out.println("four");
 			
 			/* 현재 진행중인 작업을 설정합니다(Draw) */
 			OSFrameController.getInstance().setProcessStatus(nowWork);

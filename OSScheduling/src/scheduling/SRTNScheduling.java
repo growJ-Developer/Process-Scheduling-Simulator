@@ -72,6 +72,7 @@ public class SRTNScheduling extends scheduling{
 			if(readyQueue.size() != 0) 	nowWork = getBestWork();
 			
 			System.out.println(nowWork);
+			System.out.println("two");
 			
 			/* 현재 진행중인 작업을 설정합니다(Draw) */
 			OSFrameController.getInstance().setProcessStatus(nowWork);

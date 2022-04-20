@@ -5,14 +5,18 @@
 	
 }
 
-
+.controlBtn{
+	-fx-border-radius:5em;
+	-fx-background-radius:5em;
+	-fx-padding:0 0 0 0;
+}
 
 .backgroundPane{
 	-fx-background-color:#ffffff;
 }
 
 .toolBar{
-	-fx-background-color:gray;
+	-fx-background-color:#E5E5E5;
 }
 
 .gridPane{
@@ -37,11 +41,14 @@
 	-fx-background-color:#E5E5E5;
 }
 
-.column-header{
-	-fx-background-color:#E5E5E5;
+
+.listTable .table-cell{
+	-fx-alignment:CENTER;
+	-fx-background-color:#ffffff !important;
 }
 
-.listTable{
+.listTable .column-header{
+	-fx-background-color:#E5E5E5;
 }
 
 .list-control-btn{

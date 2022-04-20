@@ -1,18 +1,27 @@
 package main;
 
+import java.lang.reflect.Parameter;
 import java.net.*;
 import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 import javax.swing.Action;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.*;
+import javafx.collections.ListChangeListener.Change;
 import javafx.event.ActionEvent;
 import javafx.fxml.*;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import scheduling.FCFSScheduling;
 import scheduling.HRRNScheduling;
 import scheduling.RRScheduling;
@@ -51,8 +60,8 @@ public class OSFrameController implements Initializable{
 	@FXML private Button toRightBtn;							// 스케줄링 삭제 
 	
 	// Visualizer
-	private static ObservableList<String> processStatusList = FXCollections.observableArrayList();
-	@FXML private ListView<String> processStatus;				
+	private static ObservableList<workSection> processStatusList = FXCollections.observableArrayList();
+	@FXML private ListView<workSection> processStatus;				
 	
 	// 스케줄링 리스트
 	private static ObservableList<schedulingTableModel> schedulingTableList = FXCollections.observableArrayList();
@@ -67,14 +76,14 @@ public class OSFrameController implements Initializable{
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		stageDragableMoveWindow();												// 창이동 Action
-		initializeListTable();													// Scheduling List Action 
+		initializeListTable();													// Scheduling List Action
+		initializeProcessStatus();												// Process Status(Visualizer) Action
+		initializeTextField();													// Set Numeric Field
 		handleSchedulingSelectAction();											// Scheduling Type Action
 		handleCoreSelectAction();												// Core Selection Action
+		timeQuantumInput.setDisable(true);
 		closeButton.setOnAction(event -> handleCloseButtonAction(event));		// 닫기버튼 Action
 		minButton.setOnAction(event -> handleMinButtonAction(event));
-		
-		processStatus.setOrientation(Orientation.HORIZONTAL);
-		processStatus.setItems(processStatusList);
 		
 		startBtn.setOnAction(event -> handleStartBtnAction(event));				// 시작버튼 Action
 		stopBtn.setOnAction(event -> handleStopBtnAction(event)); 				// 정지버튼 Action
@@ -86,16 +95,24 @@ public class OSFrameController implements Initializable{
 		return singletone;
 	}
 	
+	
+	public void initializeProcessStatus() {
+		processStatus.setOrientation(Orientation.HORIZONTAL);
+		processStatus.setItems(processStatusList);
+		processStatus.setCellFactory(new Callback<ListView<workSection>, ListCell<workSection>>() {
+			@Override
+			public ListCell<workSection> call(ListView<workSection> param) {
+				return new StatusCell();
+			}
+		});
+	}
+	
 	/* 프로세스 Visualizer를 설정합니다 */
 	public void setProcessStatus(workSection work) {
 		Platform.runLater(new Runnable() {	
 			@Override
-			public void run() {
-				String processId = "";
-				if(work != null) {
-					processId = "P" + work.getWorkId();
-				}				
-				processStatusList.add(processId);
+			public void run() {			
+				processStatusList.add(work);
 			}
 		});
 		
@@ -106,11 +123,15 @@ public class OSFrameController implements Initializable{
 		setSchedulingClass();													// 스케줄링 기법 정보 획득
 		setCoreSet();										
 		
-		scheduling.setScheduling(schedulingList, timeQuantum, coreSet);
-		scheduling.runScheduling();
-		
 		stopBtn.setVisible(true);
 		startBtn.setVisible(false);
+		
+		/* Visualize 초기화 */
+		processStatusList.clear();
+		processStatus.setItems(processStatusList);
+		
+		scheduling.setScheduling(schedulingList, timeQuantum, coreSet);
+		scheduling.runScheduling();
 	}
 	
 	/* 정지버튼에 대한 ACtion을 지정합니다. */
@@ -181,9 +202,10 @@ public class OSFrameController implements Initializable{
 		int burstTime = Integer.parseInt(burstTimeInput.getText());
 		
 		schedulingTableModel model = new schedulingTableModel(arrivalTime, burstTime);
-		workSection work = new workSection(model.getProcessNo().get(), arrivalTime, burstTime);
+		workSection work = new workSection(model.getProcessNo().get(), arrivalTime, burstTime, model.getColor());
 		schedulingList.add(work);
-		schedulingTableList.add(model);
+		listTable.getItems().add(model);
+		//schedulingTableList.add(model);
 	}
 	
 	/* 스케줄링 종류 선택에 대한 Action을 지정합니다 */
@@ -195,6 +217,15 @@ public class OSFrameController implements Initializable{
 			MenuItem menu = it.next();
 			menu.setOnAction(event -> {
 				schedulingTypeSelect.setText(menu.getText());
+				
+				switch (menu.getText()) {
+				case "Round-Robin":
+					timeQuantumInput.setDisable(false);
+					break;
+				default:
+					timeQuantumInput.setDisable(true);
+					break;
+				}
 			});
 		}
 	}
@@ -204,13 +235,51 @@ public class OSFrameController implements Initializable{
 	private void initializeListTable() {
 		listTable.setItems(schedulingTableList);
 		processNoColumn.setCellValueFactory(cellData -> cellData.getValue().getProcessNo());
+		processNoColumn.setCellFactory(new Callback<TableColumn<schedulingTableModel,Number>, TableCell<schedulingTableModel,Number>>() {
+			@Override
+			public TableCell<schedulingTableModel, Number> call(TableColumn<schedulingTableModel, Number> param) {
+				return new ProcessCell();
+			}
+		});
 		arrivalTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getArrivalTime());
 		burstTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getBurstTime());
 		waitingTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getWaitingTime());
 		turnaroundTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getTurnaroundTime());
 		normalizedTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getNormalizedTime());
 	}
-
+	
+	/* InputField에 대한 숫자 입력으로 제한합니다 */
+	@FXML
+	private void initializeTextField() {
+		arrivalTimeInput.textProperty().addListener(new ChangeListener<String>() {
+		    @Override
+		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
+		        String newValue) {
+		        if (!newValue.matches("\\d*")) {
+		            arrivalTimeInput.setText(newValue.replaceAll("[^\\d]", ""));
+		        }
+		    }
+		});
+		burstTimeInput.textProperty().addListener(new ChangeListener<String>() {
+		    @Override
+		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
+		        String newValue) {
+		        if (!newValue.matches("\\d*")) {
+		            arrivalTimeInput.setText(newValue.replaceAll("[^\\d]", ""));
+		        }
+		    }
+		});
+		timeQuantumInput.textProperty().addListener(new ChangeListener<String>() {
+		    @Override
+		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
+		        String newValue) {
+		        if (!newValue.matches("\\d*")) {
+		            arrivalTimeInput.setText(newValue.replaceAll("[^\\d]", ""));
+		        }
+		    }
+		});
+	}
+	
 	/* 창 드래그에 대한 Action을 지정합니다 */
 	@FXML
 	private void stageDragableMoveWindow() {
@@ -247,5 +316,43 @@ public class OSFrameController implements Initializable{
 		stage = (Stage) closeButton.getScene().getWindow();
 		stage.close();
 		System.exit(0);
+	}
+	
+	/* Process Status에 대한 설정 */
+	static class StatusCell extends ListCell<workSection>{
+		@Override
+		protected void updateItem(workSection item, boolean empty) {
+			super.updateItem(item, empty);
+			if(item != null) {
+				setText("P" + item.getWorkId());
+				setTextFill(Color.WHITE);
+				setBackground(getBackground().fill(item.getColor()));
+			}
+			
+		};
+	}
+	
+	/* ProcessCell 배경 지정 */
+	static class ProcessCell extends TableCell<schedulingTableModel, Number>{
+		@Override
+		protected void updateItem(Number item, boolean empty) {
+			super.updateItem(item, empty);
+			if(item != null) {
+				TableRow<schedulingTableModel> tableRow = getTableRow();
+				if(tableRow != null) {
+					setText("P" + tableRow.getItem().getProcessNo().get());
+					setTextFill(Color.WHITE);
+					Color color = tableRow.getItem().getColor();
+					setStyle("-fx-background-color:" + toRGBCode(color) + " !important;");
+				}
+			}
+			
+			
+		};
+	}
+	
+	public static String toRGBCode(Color color) {
+		return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
+				(int) (color.getBlue() * 255));
 	}
 }

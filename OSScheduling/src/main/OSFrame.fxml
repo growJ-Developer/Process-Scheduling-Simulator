@@ -25,19 +25,28 @@
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
    </columnConstraints>
    <rowConstraints>
-      <RowConstraints maxHeight="291.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="291.0" minHeight="10.0" prefHeight="137.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="291.0" minHeight="2.0" prefHeight="25.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="291.0" minHeight="10.0" prefHeight="122.0" vgrow="SOMETIMES" />
       <RowConstraints maxHeight="634.0" minHeight="10.0" prefHeight="307.0" vgrow="SOMETIMES" />
       <RowConstraints maxHeight="513.0" minHeight="10.0" prefHeight="427.0" vgrow="SOMETIMES" />
    </rowConstraints>
    <children>
-      <HBox fx:id="toolBar" alignment="TOP_RIGHT" prefHeight="15.0" prefWidth="950.0" styleClass="toolBar">
+      <HBox fx:id="toolBar" alignment="TOP_RIGHT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="24.0" prefWidth="950.0" styleClass="toolBar">
          <children>
-            <Button fx:id="minButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0" />
-            <Button fx:id="closeButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0">
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="OS Scheduling Simulator - Team 1" wrappingWidth="897.0266723632812" />
+            <Button fx:id="minButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="13.0" prefWidth="13.0">
+               <styleClass>
+                  <String fx:value="btn-warning" />
+                  <String fx:value="controlBtn" />
+               </styleClass></Button>
+            <Button fx:id="closeButton" layoutY="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="13.0" prefWidth="13.0">
                <HBox.margin>
                   <Insets left="5.0" />
                </HBox.margin>
+               <styleClass>
+                  <String fx:value="btn-danger" />
+                  <String fx:value="controlBtn" />
+               </styleClass>
             </Button>
          </children>
          <opaqueInsets>
@@ -51,7 +60,7 @@
          <children>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="10.0" layoutY="5.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="20.0" layoutY="22.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Visualizer" wrappingWidth="100.21630859375" />
-            <ListView fx:id="processStatus" layoutX="10.0" layoutY="66.0" prefHeight="40.0" prefWidth="930.0" />
+            <ListView fx:id="processStatus" layoutX="10.0" layoutY="66.0" prefHeight="30.0" prefWidth="930.0" />
          </children>
       </AnchorPane>
       <AnchorPane prefHeight="293.0" prefWidth="950.0" styleClass="anchorPane" stylesheets="@OSFrame.css" GridPane.rowIndex="2">
@@ -149,6 +158,8 @@
                </styleClass>
             </SplitMenuButton>
             <Button fx:id="stopBtn" layoutX="770.0" layoutY="352.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" styleClass="btn-danger" text="Stop" />
+            <Text layoutX="770.0" layoutY="172.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="PCore" textAlignment="CENTER" wrappingWidth="80.0" />
+            <Text layoutX="860.0" layoutY="172.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="ECore" textAlignment="CENTER" wrappingWidth="80.0" />
          </children>
       </AnchorPane>
    </children>

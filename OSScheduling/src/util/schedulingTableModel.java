@@ -1,7 +1,10 @@
 package util;
 
+import java.util.Random;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.scene.paint.Color;
 
 /* 스케줄링 테이블 모델 클래스 */
 public class schedulingTableModel {
@@ -12,6 +15,7 @@ public class schedulingTableModel {
 	private final IntegerProperty waitingTime;
 	private final IntegerProperty turnaroundTime;
 	private final IntegerProperty normalizedTime;
+	private static Color color;
 	
 	/* 초기화 생성자 */
 	public schedulingTableModel() {
@@ -21,6 +25,12 @@ public class schedulingTableModel {
 		this.waitingTime = new SimpleIntegerProperty();
 		this.turnaroundTime = new SimpleIntegerProperty();
 		this.normalizedTime = new SimpleIntegerProperty();
+		
+		Random rand = new Random();
+		float r = rand.nextFloat();
+		float g = rand.nextFloat() / 2f;
+		float b = rand.nextFloat() / 2f;
+		color = new Color(r, g, b, 1.0);
 	}
 	
 	/* 스케줄링 목록 초기화 생성 */
@@ -88,6 +98,12 @@ public class schedulingTableModel {
 
 	public IntegerProperty getNormalizedTime() {
 		return normalizedTime;
+	}
+	public void setColor(Color color) {
+		this.color = color;
+	}
+	public Color getColor() {
+		return color;
 	}
 
 	

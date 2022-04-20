@@ -1,16 +1,22 @@
 package util;
 
+import java.util.Random;
+
+import javafx.scene.paint.Color;
+
 public class workSection implements Comparable<workSection>{
 	private int workId;				// work 고유 번호(자동 증가)
 	private int arrivalTime;		// 작업 도착 시간 
 	private int workCnt;			// 작업의 수
 	private int overWorkCnt;		// 남은 작업의 수
+	private Color color;			// 프로세스 색상
 	
-	public workSection(int workId, int arrivalTime, int workCnt) {
+	public workSection(int workId, int arrivalTime, int workCnt, Color color) {
 		this.workId = workId;
 		this.arrivalTime = arrivalTime;
 		this.workCnt = workCnt;
 		this.overWorkCnt = workCnt;
+		this.color = color;
 	}
 	
 	@Override
@@ -49,5 +55,11 @@ public class workSection implements Comparable<workSection>{
 	}
 	public int getWorkId() {
 		return workId;
+	}
+	public Color getColor() {
+		return color;
+	}
+	public void setColor(Color color) {
+		this.color = color;
 	}
 }

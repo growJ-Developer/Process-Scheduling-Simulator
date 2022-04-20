@@ -51,7 +51,7 @@
          <children>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="10.0" layoutY="5.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="20.0" layoutY="22.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Visualizer" wrappingWidth="100.21630859375" />
-            <ListView layoutX="10.0" layoutY="66.0" prefHeight="25.0" prefWidth="930.0" />
+            <ListView fx:id="processStatus" layoutX="10.0" layoutY="66.0" prefHeight="40.0" prefWidth="930.0" />
          </children>
       </AnchorPane>
       <AnchorPane prefHeight="293.0" prefWidth="950.0" styleClass="anchorPane" stylesheets="@OSFrame.css" GridPane.rowIndex="2">
@@ -93,7 +93,7 @@
                   <String fx:value="list-control-btn" />
                   <String fx:value="btn-info" />
                </styleClass></Button>
-            <Button fx:id="toRightBtn" layoutX="515.0" layoutY="223.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&lt;&lt;">
+            <Button fx:id="toRightBtn" layoutX="515.0" layoutY="223.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&gt;&gt;">
                <styleClass>
                   <String fx:value="btn-info" />
                   <String fx:value="list-control-btn" />
@@ -113,7 +113,7 @@
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="769.0" layoutY="89.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="779.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Arrival Time" wrappingWidth="100.21630859375" />
             <Button fx:id="startBtn" layoutX="770.0" layoutY="352.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" styleClass="btn-info" text="Start" />
-            <SplitMenuButton fx:id="schedulingTypeSelect" layoutX="570.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="160.0" text="Scheduling Type">
+            <SplitMenuButton fx:id="schedulingTypeSelect" layoutX="570.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="160.0" text="FCFS">
               <items>
                 <MenuItem mnemonicParsing="false" text="FCFS" />
                 <MenuItem mnemonicParsing="false" text="Round-Robin" />
@@ -126,26 +126,29 @@
                   <String fx:value="split-menu-btn" />
                </styleClass>
             </SplitMenuButton>
-            <SplitMenuButton fx:id="pCoreSelect" layoutX="770.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="PCore">
+            <SplitMenuButton fx:id="pCoreSelect" layoutX="770.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="0">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Action 1" />
-                  <MenuItem mnemonicParsing="false" text="Action 2" />
+                  <MenuItem mnemonicParsing="false" text="0" />
+                  <MenuItem mnemonicParsing="false" text="1" />
+                  <MenuItem mnemonicParsing="false" text="2" />
                </items>
                <styleClass>
                   <String fx:value="split-menu-btn" />
                   <String fx:value="split-menu-btn-default" />
                </styleClass>
             </SplitMenuButton>
-            <SplitMenuButton fx:id="eCoreSelect" layoutX="860.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="ECore">
+            <SplitMenuButton fx:id="eCoreSelect" layoutX="860.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="80.0" text="0">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Action 1" />
-                  <MenuItem mnemonicParsing="false" text="Action 2" />
+                  <MenuItem mnemonicParsing="false" text="0" />
+                  <MenuItem mnemonicParsing="false" text="1" />
+                  <MenuItem mnemonicParsing="false" text="2" />
                </items>
                <styleClass>
                   <String fx:value="split-menu-btn" />
                   <String fx:value="split-menu-btn-default" />
                </styleClass>
             </SplitMenuButton>
+            <Button fx:id="stopBtn" layoutX="770.0" layoutY="352.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" styleClass="btn-danger" text="Stop" />
          </children>
       </AnchorPane>
    </children>

@@ -4,7 +4,7 @@ import java.util.*;
 import main.OSFrameController;
 import util.*;
 
-public class SRTNScheduling extends scheduling{
+public class SPNScheduling extends scheduling{
 	private boolean isRunning;
 	private Thread mThread;
 	private int timeQuantum;
@@ -18,7 +18,7 @@ public class SRTNScheduling extends scheduling{
 	
 	
 	/* SRTN Scheduling을 수행합니다 */
-	public SRTNScheduling() {
+	public SPNScheduling() {
 		init();
 	}
 	

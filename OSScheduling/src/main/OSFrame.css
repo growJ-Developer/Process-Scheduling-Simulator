@@ -41,6 +41,10 @@
 	-fx-background-color:#E5E5E5;
 }
 
+.listTable .table-row-cell:selected{
+	-fx-text-fill:blue ! important;
+	-fx-background-color:#E5E5E5 !important;
+}
 
 .listTable .table-cell{
 	-fx-alignment:CENTER;

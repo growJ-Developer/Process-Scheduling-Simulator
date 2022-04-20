@@ -1,23 +1,17 @@
 package main;
 
-import java.lang.reflect.Parameter;
 import java.net.*;
 import java.util.*;
-import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
-
-import javax.swing.Action;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.*;
-import javafx.collections.ListChangeListener.Change;
 import javafx.event.ActionEvent;
 import javafx.fxml.*;
 import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -40,6 +34,7 @@ public class OSFrameController implements Initializable{
 	private double xOffset = 0;
 	private double yOffset = 0;
 	private Stage stage = null;
+	private static int MAX_RUN_TIME = 30;
 	
 	@FXML private GridPane parentPane;
 	@FXML private HBox toolBar;									
@@ -120,18 +115,61 @@ public class OSFrameController implements Initializable{
 	
 	/* 시작 버튼에 대한 Action을 지정합니다 */
 	private void handleStartBtnAction(ActionEvent event) {
-		setSchedulingClass();													// 스케줄링 기법 정보 획득
-		setCoreSet();										
+		if(checkStartCondition()) {
+			setSchedulingClass();													// 스케줄링 기법 정보 획득
+			setCoreSet();										
+			
+			stopBtn.setVisible(true);
+			startBtn.setVisible(false);
+			
+			/* 제어요소 비활성화 */
+			arrivalTimeInput.setDisable(true);
+			burstTimeInput.setDisable(true);
+			timeQuantumInput.setDisable(true);
+			pCoreSelect.setDisable(true);
+			eCoreSelect.setDisable(true);
+			
+			/* Visualize 초기화 */
+			processStatusList.clear();
+			processStatus.setItems(processStatusList);
+			
+			scheduling.setScheduling(schedulingList, timeQuantum, coreSet);
+			scheduling.runScheduling();
+		}
 		
-		stopBtn.setVisible(true);
-		startBtn.setVisible(false);
+	}
+	
+	/* 정상 입력 여부를 체크합니다 */
+	private boolean checkStartCondition() {
+		/* 코어 확인 */
+		int pCoreCnt = Integer.parseInt(pCoreSelect.getText());
+		int eCoreCnt = Integer.parseInt(eCoreSelect.getText());
+		if(pCoreCnt + eCoreCnt <= 0) {
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Core Warnning", "Please specify a core for running Scheduling.");
+			alert.showAlert();
+			return false;
+		}
 		
-		/* Visualize 초기화 */
-		processStatusList.clear();
-		processStatus.setItems(processStatusList);
+		/* 스케줄링 확인 */
+		if(listTable.getItems().size() <= 0) {
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Scheduling Warnning", "Scheduling to simulate does not exist.Please add a scheduling entry.");
+			alert.showAlert();
+			return false;
+		}
+	
+		String timeQuantum = timeQuantumInput.getText();
+		/* TimeQuantum 확인 */
+		if(!timeQuantumInput.isDisable() && timeQuantum.length() <= 0) {
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "Please wirte the timeQuantum.");
+			alert.showAlert();
+			return false;
+		} else if(!timeQuantumInput.isDisable() && Integer.parseInt(timeQuantum) <= 0) {
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "The timeQuantum must be at least zero.");
+			alert.showAlert();
+			return false;
+		}
+		return true;
 		
-		scheduling.setScheduling(schedulingList, timeQuantum, coreSet);
-		scheduling.runScheduling();
 	}
 	
 	/* 정지버튼에 대한 ACtion을 지정합니다. */
@@ -139,6 +177,15 @@ public class OSFrameController implements Initializable{
 		scheduling.stopScheduling();
 		stopBtn.setVisible(false);
 		startBtn.setVisible(true);
+		
+		
+		
+		/* 제어요소 비활성화 */
+		arrivalTimeInput.setDisable(false);
+		burstTimeInput.setDisable(false);
+		setTimeQuantumDisable(schedulingTypeSelect.getText());
+		pCoreSelect.setDisable(false);
+		eCoreSelect.setDisable(false);
 	}
 	
 	/* 코어정보를 확인하여 반영합니다. */
@@ -198,14 +245,49 @@ public class OSFrameController implements Initializable{
 	
 	/* Scheduling 추가 버튼에 대한 Action을 지정합니다 */
 	private void handleToLeftBtnAction(ActionEvent event) {
-		int arrivalTime = Integer.parseInt(arrivalTimeInput.getText());
-		int burstTime = Integer.parseInt(burstTimeInput.getText());
+		if(checkAddScheduleCondition()) {
+			int arrivalTime = Integer.parseInt(arrivalTimeInput.getText());
+			int burstTime = Integer.parseInt(burstTimeInput.getText());
+			
+			schedulingTableModel model = new schedulingTableModel(arrivalTime, burstTime);
+			workSection work = new workSection(model.getProcessNo().get(), arrivalTime, burstTime, model.getColor());
+			schedulingList.add(work);
+			listTable.getItems().add(model);
+		}
+	}
+	
+	/* 스케줄링 추가 조건을 확인합니다 */
+	private boolean checkAddScheduleCondition() {
+		String arrivalTime = arrivalTimeInput.getText();
+		String burstTime = burstTimeInput.getText();
 		
-		schedulingTableModel model = new schedulingTableModel(arrivalTime, burstTime);
-		workSection work = new workSection(model.getProcessNo().get(), arrivalTime, burstTime, model.getColor());
-		schedulingList.add(work);
-		listTable.getItems().add(model);
-		//schedulingTableList.add(model);
+		if(arrivalTime.length() <= 0) {
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "Please wirte the arrivalTime.");
+			alert.showAlert();
+			return false;
+		} else if(burstTime.length() <= 0) {
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "Please wirte the burstTime.");
+			alert.showAlert();
+			return false;
+		} else if(Integer.parseInt(burstTime) <= 0) {
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "The BurstTime must be at least zero.");
+			alert.showAlert();
+			return false;
+		} 
+		
+		/* 스케줄링 토탈 시간을 점검합니다 */
+		int totalBurstTime = 0;
+		for(schedulingTableModel model : schedulingTableList) {
+			totalBurstTime += model.getBurstTime().get();
+		}
+		
+		if(totalBurstTime > MAX_RUN_TIME) {
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "The total execution time must be less than " + MAX_RUN_TIME +" seconds.");
+			alert.showAlert();
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/* 스케줄링 종류 선택에 대한 Action을 지정합니다 */
@@ -217,16 +299,20 @@ public class OSFrameController implements Initializable{
 			MenuItem menu = it.next();
 			menu.setOnAction(event -> {
 				schedulingTypeSelect.setText(menu.getText());
-				
-				switch (menu.getText()) {
-				case "Round-Robin":
-					timeQuantumInput.setDisable(false);
-					break;
-				default:
-					timeQuantumInput.setDisable(true);
-					break;
-				}
+				setTimeQuantumDisable(menu.getText());
 			});
+		}
+	}
+	
+	/* TimeQuantum의 활성화 여부를 설정합니다 */
+	private void setTimeQuantumDisable(String text) {
+		switch (text) {
+		case "Round-Robin":
+			timeQuantumInput.setDisable(false);
+			break;
+		default:
+			timeQuantumInput.setDisable(true);
+			break;
 		}
 	}
 	
@@ -327,6 +413,7 @@ public class OSFrameController implements Initializable{
 				setText("P" + item.getWorkId());
 				setTextFill(Color.WHITE);
 				setBackground(getBackground().fill(item.getColor()));
+				setStyle("-fx-border-radius:5em;");
 			}
 			
 		};

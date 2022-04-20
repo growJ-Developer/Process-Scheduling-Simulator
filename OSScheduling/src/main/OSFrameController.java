@@ -9,6 +9,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.*;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -16,12 +17,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import scheduling.FCFSScheduling;
-import scheduling.HRRNScheduling;
-import scheduling.RRScheduling;
-import scheduling.SPNScheduling;
-import scheduling.SRTNScheduling;
-import scheduling.scheduling;
+import scheduling.*;
 import util.*;
 
 public class OSFrameController implements Initializable{
@@ -49,8 +45,6 @@ public class OSFrameController implements Initializable{
 	@FXML private SplitMenuButton eCoreSelect;					// eCore 선택기 
 	@FXML private Button startBtn;								// 시작버튼
 	@FXML private Button stopBtn;								// 정지버튼
-	@FXML private Button toUpBtn;								// 스케줄링 순번 변경(위)
-	@FXML private Button toDownBtn;								// 스케줄링 순번 변경(아래)
 	@FXML private Button toLeftBtn;								// 스케줄링 추가 
 	@FXML private Button toRightBtn;							// 스케줄링 삭제 
 	
@@ -68,15 +62,28 @@ public class OSFrameController implements Initializable{
 	@FXML private TableColumn<schedulingTableModel, Number> turnaroundTimeColumn;
 	@FXML private TableColumn<schedulingTableModel, Number> normalizedTimeColumn;
 	
+	// Ready Queue
+	private static ObservableList<workSection> readyQueueList = FXCollections.observableArrayList();
+	@FXML private ListView<workSection> readyQueue;
+	
+	// 현재실행 정보
+	@FXML private Button nowRunning;
+	@FXML private ProgressBar progressBar;
+	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		stageDragableMoveWindow();												// 창이동 Action
 		initializeListTable();													// Scheduling List Action
 		initializeProcessStatus();												// Process Status(Visualizer) Action
+		initalizeReadyQueue();													// Ready Queue Action
 		initializeTextField();													// Set Numeric Field
+		initalizeNowRunning();
 		handleSchedulingSelectAction();											// Scheduling Type Action
 		handleCoreSelectAction();												// Core Selection Action
 		timeQuantumInput.setDisable(true);
+		
+		listTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		
 		closeButton.setOnAction(event -> handleCloseButtonAction(event));		// 닫기버튼 Action
 		minButton.setOnAction(event -> handleMinButtonAction(event));
 		
@@ -84,6 +91,7 @@ public class OSFrameController implements Initializable{
 		stopBtn.setOnAction(event -> handleStopBtnAction(event)); 				// 정지버튼 Action
 		stopBtn.setVisible(false);
 		toLeftBtn.setOnAction(event -> handleToLeftBtnAction(event));			// 추가버튼 Action
+		toRightBtn.setOnAction(event -> handleToRightBtnAction(event)); 		// 삭제버튼 Action
 	}
 	
 	public static OSFrameController getInstance() {
@@ -91,7 +99,7 @@ public class OSFrameController implements Initializable{
 	}
 	
 	
-	public void initializeProcessStatus() {
+	private void initializeProcessStatus() {
 		processStatus.setOrientation(Orientation.HORIZONTAL);
 		processStatus.setItems(processStatusList);
 		processStatus.setCellFactory(new Callback<ListView<workSection>, ListCell<workSection>>() {
@@ -102,12 +110,64 @@ public class OSFrameController implements Initializable{
 		});
 	}
 	
+	private void initalizeNowRunning() {
+		nowRunning.setOnAction(event -> {});
+	}
+	
+	private void initalizeReadyQueue() {
+		readyQueue.setOrientation(Orientation.HORIZONTAL);
+		readyQueue.setItems(readyQueueList);
+		readyQueue.setCellFactory(new Callback<ListView<workSection>, ListCell<workSection>>() {
+			@Override
+			public ListCell<workSection> call(ListView<workSection> param) {
+				return new StatusCell();
+			}
+		});
+	}
+	
+	/* ReadyQueue를 설정합니다 */
+	public void setReadyQueueStatus(PriorityQueue<workSection> readyQueueOrigin) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				readyQueueList.clear();
+				
+				ArrayList<workSection> readyList = new ArrayList<>(readyQueueOrigin);
+				
+				for(int index = 0; index < readyList.size(); index++) {
+					workSection work = readyList.get(index);
+					readyQueueList.add(work);
+				}
+			}
+		});
+	}
+	
 	/* 프로세스 Visualizer를 설정합니다 */
 	public void setProcessStatus(workSection work) {
 		Platform.runLater(new Runnable() {	
+			@SuppressWarnings("static-access")
 			@Override
 			public void run() {			
+				/* 프로세스 진행 막대 설정 */
 				processStatusList.add(work);
+				
+				
+				/* 현재 실행 프로세스 설정 */
+				if(work != null) {
+					nowRunning.setText("P" + work.getWorkId());
+					nowRunning.setBackground(nowRunning.getBackground().fill(work.getColor()));
+					
+					/* 프로그래스 바 설정 */
+					double progressPercent = 0;
+					if(work.getOverWorkCnt() <= 0) {
+						progressPercent = 1.0;
+					} else {
+						progressPercent = (work.getWorkCnt() - work.getOverWorkCnt()) / work.getWorkCnt();
+					}
+					
+					//progressBar = new ProgressBar();
+					//progressBar.setProgress(progressPercent);
+				}
 			}
 		});
 		
@@ -118,6 +178,13 @@ public class OSFrameController implements Initializable{
 		if(checkStartCondition()) {
 			setSchedulingClass();													// 스케줄링 기법 정보 획득
 			setCoreSet();										
+			
+			/* 스케줄러 Queue를 구성합니다 */
+			schedulingList = new PriorityQueue<>();
+			for(schedulingTableModel model : schedulingTableList) {
+				workSection work = new workSection(model.getProcessNo().get(), model.getArrivalTime().get(), model.getBurstTime().get(), model.getColor());
+				schedulingList.add(work);
+			}
 			
 			stopBtn.setVisible(true);
 			startBtn.setVisible(false);
@@ -177,7 +244,6 @@ public class OSFrameController implements Initializable{
 		scheduling.stopScheduling();
 		stopBtn.setVisible(false);
 		startBtn.setVisible(true);
-		
 		
 		
 		/* 제어요소 비활성화 */
@@ -250,11 +316,40 @@ public class OSFrameController implements Initializable{
 			int burstTime = Integer.parseInt(burstTimeInput.getText());
 			
 			schedulingTableModel model = new schedulingTableModel(arrivalTime, burstTime);
-			workSection work = new workSection(model.getProcessNo().get(), arrivalTime, burstTime, model.getColor());
-			schedulingList.add(work);
 			listTable.getItems().add(model);
 		}
 	}
+	
+	/* Scheduling 삭제 버튼에 대한 Action을 지정합니다 */
+	private void handleToRightBtnAction(ActionEvent event) {
+		ObservableList<schedulingTableModel> modelList = listTable.getSelectionModel().getSelectedItems();
+		ArrayList<schedulingTableModel> rows = new ArrayList<>(modelList);
+		
+		Iterator<schedulingTableModel> it = rows.iterator();
+		while(it.hasNext()) {
+			schedulingTableModel row = it.next();
+			int index = schedulingTableList.indexOf(row);
+			
+			/* 삭제 뒤에 색상 지우기를 위해 빈 요소 삽입후 삭제합니다 */
+			schedulingTableModel blank = new schedulingTableModel();
+			blank.setProcessNo(-1);
+			blank.setColor(Color.WHITE);
+			blank.setEmpty(true);
+			schedulingTableList.add(blank);
+			
+			schedulingTableList.remove(index);
+			
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					System.out.println(schedulingTableList.size());
+					schedulingTableList.remove(schedulingTableList.size() - 1);
+				}
+			});
+			
+		}
+	}	
 	
 	/* 스케줄링 추가 조건을 확인합니다 */
 	private boolean checkAddScheduleCondition() {
@@ -404,21 +499,38 @@ public class OSFrameController implements Initializable{
 		System.exit(0);
 	}
 	
+	private static String toRGBCode(Color color) {
+		return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
+				(int) (color.getBlue() * 255));
+	}
+
 	/* Process Status에 대한 설정 */
 	static class StatusCell extends ListCell<workSection>{
+		@SuppressWarnings("static-access")
 		@Override
 		protected void updateItem(workSection item, boolean empty) {
 			super.updateItem(item, empty);
 			if(item != null) {
-				setText("P" + item.getWorkId());
+				if(processStatusList.size() > 1 && processStatusList.get(processStatusList.size() - 2).getWorkId() == item.getWorkId()) {
+					setText("");
+				} else {
+					setText("P" + item.getWorkId());
+				}
+				
 				setTextFill(Color.WHITE);
 				setBackground(getBackground().fill(item.getColor()));
+				setPrefHeight(30);
+				setMaxHeight(30);
+				setPrefWidth(30);
+				setMaxWidth(30);
+				setPadding(new Insets(0, 0, 0, 5));
+				setStyle("-fx-font-size:8px !important;");
 				setStyle("-fx-border-radius:5em;");
 			}
 			
 		};
 	}
-	
+
 	/* ProcessCell 배경 지정 */
 	static class ProcessCell extends TableCell<schedulingTableModel, Number>{
 		@Override
@@ -427,19 +539,15 @@ public class OSFrameController implements Initializable{
 			if(item != null) {
 				TableRow<schedulingTableModel> tableRow = getTableRow();
 				if(tableRow != null) {
-					setText("P" + tableRow.getItem().getProcessNo().get());
+					schedulingTableModel model = tableRow.getItem();
+					setText("P" + model.getProcessNo().get());
 					setTextFill(Color.WHITE);
-					Color color = tableRow.getItem().getColor();
+					Color color = model.getColor();
 					setStyle("-fx-background-color:" + toRGBCode(color) + " !important;");
 				}
 			}
-			
-			
 		};
-	}
-	
-	public static String toRGBCode(Color color) {
-		return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
-				(int) (color.getBlue() * 255));
+		
+		
 	}
 }

@@ -76,6 +76,8 @@ public class SRTNScheduling extends scheduling{
 			/* 현재 진행중인 작업을 설정합니다(Draw) */
 			OSFrameController.getInstance().setProcessStatus(nowWork);
 			
+			OSFrameController.getInstance().setReadyQueueStatus(readyQueue);
+			
 			/* 작업을 진행한뒤, 잔여시간을 체크하여, endList로 옮깁니다 */
 			if(nowWork != null) {
 				nowWork.setOverWorkCnt(nowWork.getOverWorkCnt() - coreSet.getWorkByCore());

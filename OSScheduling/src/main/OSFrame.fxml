@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.SplitMenuButton?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -60,7 +61,7 @@
          <children>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="10.0" layoutY="5.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="20.0" layoutY="22.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Visualizer" wrappingWidth="100.21630859375" />
-            <ListView fx:id="processStatus" layoutX="10.0" layoutY="66.0" prefHeight="30.0" prefWidth="930.0" />
+            <ListView fx:id="processStatus" layoutX="10.0" layoutY="66.0" prefHeight="30.0" prefWidth="930.0" styleClass="statusList" />
          </children>
       </AnchorPane>
       <AnchorPane prefHeight="293.0" prefWidth="950.0" styleClass="anchorPane" stylesheets="@OSFrame.css" GridPane.rowIndex="2">
@@ -87,26 +88,18 @@
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
             </TableView>
-            <Button fx:id="toUpBtn" layoutX="499.0" layoutY="319.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="↑">
-               <styleClass>
-                  <String fx:value="btn-default" />
-                  <String fx:value="list-sort-btn" />
-               </styleClass></Button>
-            <Button fx:id="toDownBtn" layoutX="499.0" layoutY="366.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="↓">
-               <styleClass>
-                  <String fx:value="list-sort-btn" />
-                  <String fx:value="btn-default" />
-               </styleClass></Button>
-            <Button fx:id="toLeftBtn" layoutX="515.0" layoutY="171.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&lt;&lt;">
+            <Button fx:id="toLeftBtn" layoutX="512.0" layoutY="171.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&lt;&lt;">
                <styleClass>
                   <String fx:value="list-control-btn" />
                   <String fx:value="btn-info" />
-               </styleClass></Button>
-            <Button fx:id="toRightBtn" layoutX="515.0" layoutY="223.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&gt;&gt;">
+               </styleClass>
+            </Button>
+            <Button fx:id="toRightBtn" layoutX="512.0" layoutY="223.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="&gt;&gt;">
                <styleClass>
                   <String fx:value="btn-info" />
                   <String fx:value="list-control-btn" />
-               </styleClass></Button>
+               </styleClass>
+            </Button>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="570.0" layoutY="89.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
             <Text layoutX="580.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Scheduling Type" wrappingWidth="130.21630859375" />
             <TextField fx:id="arrivalTimeInput" layoutX="570.0" layoutY="196.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="160.0" styleClass="inputBox" />
@@ -160,6 +153,19 @@
             <Button fx:id="stopBtn" layoutX="770.0" layoutY="352.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" styleClass="btn-danger" text="Stop" />
             <Text layoutX="770.0" layoutY="172.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="PCore" textAlignment="CENTER" wrappingWidth="80.0" />
             <Text layoutX="860.0" layoutY="172.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="ECore" textAlignment="CENTER" wrappingWidth="80.0" />
+            <ListView fx:id="readyQueue" layoutX="10.0" layoutY="33.0" prefHeight="50.0" prefWidth="485.0" styleClass="readyQueue" />
+            <Button fx:id="nowRunning" layoutX="570.0" layoutY="38.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0">
+               <styleClass>
+                  <String fx:value="btn-default" />
+                  <String fx:value="nowRunning" />
+               </styleClass>
+            </Button>
+            <ProgressBar fx:id="progressBar" layoutX="621.0" layoutY="51.0" prefHeight="15.0" prefWidth="317.0" progress="0.0">
+               <styleClass>
+                  <String fx:value="progressBar" />
+                  <String fx:value="progress-bar-success" />
+               </styleClass>
+            </ProgressBar>
          </children>
       </AnchorPane>
    </children>

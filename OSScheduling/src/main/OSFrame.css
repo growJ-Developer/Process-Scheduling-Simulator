@@ -5,11 +5,49 @@
 	
 }
 
+.statusList{
+
+}
+
+.readyQueue{
+	-fx-background-insets:0;
+	-fx-border-width:0px;
+	-fx-padding:0px;
+	-fx-background-color:#E5E5E5;
+}
+
+.readyQueue .split-pane {
+	-fx-background-insets: 0; 
+	-fx-padding: 0; 
+}
+
+
+.nowRunning{
+	-fx-border-radius:0.5em;
+}
+
 .controlBtn{
 	-fx-border-radius:5em;
 	-fx-background-radius:5em;
 	-fx-padding:0 0 0 0;
 }
+
+.list-view .scroll-bar:horizontal .increment-arrow,
+.list-view .scroll-bar:horizontal .decrement-arrow,
+.list-view .scroll-bar:horizontal .increment-button,
+.list-view .scroll-bar:horizontal .decrement-button {
+    -fx-padding:-7 !important;
+    -fx-opacity:0;
+}
+
+.list-view .scroll-bar:vertical .increment-arrow,
+.list-view .scroll-bar:vertical .decrement-arrow,
+.list-view .scroll-bar:vertical .increment-button,
+.list-view .scroll-bar:vertical .decrement-button {
+    -fx-padding:-7 !important;
+    -fx-opacity:0;
+}
+
 
 .backgroundPane{
 	-fx-background-color:#ffffff;

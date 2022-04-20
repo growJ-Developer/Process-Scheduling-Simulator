@@ -15,7 +15,8 @@ public class schedulingTableModel {
 	private final IntegerProperty waitingTime;
 	private final IntegerProperty turnaroundTime;
 	private final IntegerProperty normalizedTime;
-	private static Color color;
+	private Color color;
+	private boolean isEmpty;
 	
 	/* 초기화 생성자 */
 	public schedulingTableModel() {
@@ -25,6 +26,7 @@ public class schedulingTableModel {
 		this.waitingTime = new SimpleIntegerProperty();
 		this.turnaroundTime = new SimpleIntegerProperty();
 		this.normalizedTime = new SimpleIntegerProperty();
+		this.isEmpty = false;
 		
 		Random rand = new Random();
 		float r = rand.nextFloat();
@@ -99,11 +101,21 @@ public class schedulingTableModel {
 	public IntegerProperty getNormalizedTime() {
 		return normalizedTime;
 	}
+	
 	public void setColor(Color color) {
 		this.color = color;
 	}
+	
 	public Color getColor() {
 		return color;
+	}
+	
+	public void setEmpty(boolean isEmpty) {
+		this.isEmpty = isEmpty;
+	}
+	
+	public boolean getEmpty() {
+		return isEmpty;
 	}
 
 	

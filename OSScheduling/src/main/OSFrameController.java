@@ -31,6 +31,7 @@ public class OSFrameController implements Initializable{
 	private double yOffset = 0;
 	private Stage stage = null;
 	private static int MAX_RUN_TIME = 30;
+	private Thread mThread;
 	
 	@FXML private GridPane parentPane;
 	@FXML private HBox toolBar;									
@@ -47,6 +48,12 @@ public class OSFrameController implements Initializable{
 	@FXML private Button stopBtn;								// 정지버튼
 	@FXML private Button toLeftBtn;								// 스케줄링 추가 
 	@FXML private Button toRightBtn;							// 스케줄링 삭제 
+	
+	// 현재실행 정보
+	@FXML private Label nowRunning;
+	private static Label staticNowRunning;
+	@FXML private ProgressBar progressBar;
+	private static ProgressBar staticProgressBar;
 	
 	// Visualizer
 	private static ObservableList<workSection> processStatusList = FXCollections.observableArrayList();
@@ -66,9 +73,8 @@ public class OSFrameController implements Initializable{
 	private static ObservableList<workSection> readyQueueList = FXCollections.observableArrayList();
 	@FXML private ListView<workSection> readyQueue;
 	
-	// 현재실행 정보
-	@FXML private Button nowRunning;
-	@FXML private ProgressBar progressBar;
+	// Gantt Chart
+	@FXML private GridPane granttPane;	
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -77,10 +83,12 @@ public class OSFrameController implements Initializable{
 		initializeProcessStatus();												// Process Status(Visualizer) Action
 		initalizeReadyQueue();													// Ready Queue Action
 		initializeTextField();													// Set Numeric Field
-		initalizeNowRunning();
 		handleSchedulingSelectAction();											// Scheduling Type Action
 		handleCoreSelectAction();												// Core Selection Action
 		timeQuantumInput.setDisable(true);
+		
+		staticNowRunning = nowRunning;
+		staticProgressBar = progressBar;
 		
 		listTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		
@@ -98,7 +106,6 @@ public class OSFrameController implements Initializable{
 		return singletone;
 	}
 	
-	
 	private void initializeProcessStatus() {
 		processStatus.setOrientation(Orientation.HORIZONTAL);
 		processStatus.setItems(processStatusList);
@@ -110,10 +117,6 @@ public class OSFrameController implements Initializable{
 		});
 	}
 	
-	private void initalizeNowRunning() {
-		nowRunning.setOnAction(event -> {});
-	}
-	
 	private void initalizeReadyQueue() {
 		readyQueue.setOrientation(Orientation.HORIZONTAL);
 		readyQueue.setItems(readyQueueList);
@@ -123,6 +126,44 @@ public class OSFrameController implements Initializable{
 				return new StatusCell();
 			}
 		});
+	}
+	
+	/* 프로세스 Visualizer를 설정합니다 */
+	public void setProcessStatus(workSection work) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {			
+				/* 프로세스 진행 막대 설정 */
+				processStatusList.add(work);
+			}
+		});
+		
+	}
+	
+	/* 현재 프로세스 정보를 설정합니다 */
+	public static void setNowProcessing(workSection work) {
+		Platform.runLater(new Runnable() {		
+			@Override
+			public void run() {
+				if(work != null) {
+					/* 현재 프로세스를 설정 */
+					staticNowRunning.setText("P" + work.getWorkId());
+					staticNowRunning.setStyle("-fx-border-radius:0.5em;");
+					staticNowRunning.setStyle("-fx-background-radius:0.5em;");
+					staticNowRunning.setStyle("-fx-background-color:" + toRGBCode(work.getColor()) + " !important");
+					
+					/* 진행 상태를 설정 */
+					double progressPoint = 0.0;
+					if(work.getOverWorkCnt() <= 0) progressPoint = 1.0;
+					else {
+						System.out.println(work);
+						progressPoint = ((double) work.getWorkCnt() - (double) work.getOverWorkCnt()) / (double) work.getWorkCnt();
+					}
+					System.out.println(progressPoint);
+					staticProgressBar.setProgress(progressPoint);
+				}
+			}
+		});	
 	}
 	
 	/* ReadyQueue를 설정합니다 */
@@ -142,36 +183,7 @@ public class OSFrameController implements Initializable{
 		});
 	}
 	
-	/* 프로세스 Visualizer를 설정합니다 */
-	public void setProcessStatus(workSection work) {
-		Platform.runLater(new Runnable() {	
-			@SuppressWarnings("static-access")
-			@Override
-			public void run() {			
-				/* 프로세스 진행 막대 설정 */
-				processStatusList.add(work);
-				
-				
-				/* 현재 실행 프로세스 설정 */
-				if(work != null) {
-					nowRunning.setText("P" + work.getWorkId());
-					nowRunning.setBackground(nowRunning.getBackground().fill(work.getColor()));
-					
-					/* 프로그래스 바 설정 */
-					double progressPercent = 0;
-					if(work.getOverWorkCnt() <= 0) {
-						progressPercent = 1.0;
-					} else {
-						progressPercent = (work.getWorkCnt() - work.getOverWorkCnt()) / work.getWorkCnt();
-					}
-					
-					//progressBar = new ProgressBar();
-					//progressBar.setProgress(progressPercent);
-				}
-			}
-		});
-		
-	}
+	
 	
 	/* 시작 버튼에 대한 Action을 지정합니다 */
 	private void handleStartBtnAction(ActionEvent event) {
@@ -199,6 +211,9 @@ public class OSFrameController implements Initializable{
 			/* Visualize 초기화 */
 			processStatusList.clear();
 			processStatus.setItems(processStatusList);
+			
+			/* Gantt Chart 설정 */
+			
 			
 			scheduling.setScheduling(schedulingList, timeQuantum, coreSet);
 			scheduling.runScheduling();
@@ -291,19 +306,19 @@ public class OSFrameController implements Initializable{
 		
 		switch (schedulingType) {
 		case "FCFS":
-			scheduling = new FCFSScheduling();
+			scheduling = new SRTNScheduling();
 			break;
 		case "Round-Robin":
-			scheduling = new RRScheduling();
+			scheduling = new SRTNScheduling();
 			break;
 		case "SPN":
-			scheduling = new SPNScheduling();
+			scheduling = new SRTNScheduling();
 			break;
 		case "SRTN":
 			scheduling = new SRTNScheduling();
 			break;
 		case "HRRN":
-			scheduling = new HRRNScheduling();
+			scheduling = new SRTNScheduling();
 			break;
 		}
 	}
@@ -412,7 +427,6 @@ public class OSFrameController implements Initializable{
 	}
 	
 	/* 스케줄링 리스트 테이블에 대한 초기화를 진행합니다 */
-	@FXML
 	private void initializeListTable() {
 		listTable.setItems(schedulingTableList);
 		processNoColumn.setCellValueFactory(cellData -> cellData.getValue().getProcessNo());
@@ -430,7 +444,6 @@ public class OSFrameController implements Initializable{
 	}
 	
 	/* InputField에 대한 숫자 입력으로 제한합니다 */
-	@FXML
 	private void initializeTextField() {
 		arrivalTimeInput.textProperty().addListener(new ChangeListener<String>() {
 		    @Override
@@ -462,7 +475,6 @@ public class OSFrameController implements Initializable{
 	}
 	
 	/* 창 드래그에 대한 Action을 지정합니다 */
-	@FXML
 	private void stageDragableMoveWindow() {
 		toolBar.setOnMousePressed((event) -> {
 			xOffset = event.getSceneX();
@@ -485,14 +497,12 @@ public class OSFrameController implements Initializable{
 	}
 	
 	/* 최소화 버튼에 대한 Action을 지정합니다 */
-	@FXML
 	private void handleMinButtonAction(ActionEvent event) {
 		stage = (Stage) minButton.getScene().getWindow();
 		stage.setIconified(true);
 	}
 	
 	/* 닫기 버튼에 대한 Action을 지정합니다 */
-	@FXML
 	private void handleCloseButtonAction(ActionEvent event) {
 		stage = (Stage) closeButton.getScene().getWindow();
 		stage.close();
@@ -506,7 +516,6 @@ public class OSFrameController implements Initializable{
 
 	/* Process Status에 대한 설정 */
 	static class StatusCell extends ListCell<workSection>{
-		@SuppressWarnings("static-access")
 		@Override
 		protected void updateItem(workSection item, boolean empty) {
 			super.updateItem(item, empty);

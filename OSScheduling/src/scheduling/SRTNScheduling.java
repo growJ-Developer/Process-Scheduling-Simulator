@@ -71,12 +71,9 @@ public class SRTNScheduling extends scheduling{
 			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
 			if(readyQueue.size() != 0) 	nowWork = getBestWork();
 			
-			System.out.println(nowWork);
-			System.out.println("two");
-			
 			/* 현재 진행중인 작업을 설정합니다(Draw) */
 			OSFrameController.getInstance().setProcessStatus(nowWork);
-			
+			OSFrameController.getInstance().setNowProcessing(nowWork);
 			OSFrameController.getInstance().setReadyQueueStatus(readyQueue);
 			
 			/* 작업을 진행한뒤, 잔여시간을 체크하여, endList로 옮깁니다 */

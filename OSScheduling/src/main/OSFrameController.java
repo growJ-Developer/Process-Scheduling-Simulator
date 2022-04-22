@@ -30,7 +30,7 @@ public class OSFrameController implements Initializable{
 	private double xOffset = 0;
 	private double yOffset = 0;
 	private Stage stage = null;
-	private static int MAX_RUN_TIME = 30;
+	public static int MAX_RUN_TIME = 30;
 	private Thread mThread;
 	
 	@FXML private GridPane parentPane;
@@ -57,7 +57,8 @@ public class OSFrameController implements Initializable{
 	
 	// Visualizer
 	private static ObservableList<workSection> processStatusList = FXCollections.observableArrayList();
-	@FXML private ListView<workSection> processStatus;				
+	@FXML private ListView<workSection> processStatus;	
+	@FXML private Slider tickSlider;
 	
 	// 스케줄링 리스트
 	private static ObservableList<schedulingTableModel> schedulingTableList = FXCollections.observableArrayList();
@@ -74,7 +75,8 @@ public class OSFrameController implements Initializable{
 	@FXML private ListView<workSection> readyQueue;
 	
 	// Gantt Chart
-	@FXML private GridPane granttPane;	
+	@FXML private GridPane ganttPane;	
+	private static GridPane staticGanttPane;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -89,6 +91,7 @@ public class OSFrameController implements Initializable{
 		
 		staticNowRunning = nowRunning;
 		staticProgressBar = progressBar;
+		staticGanttPane = ganttPane;
 		
 		listTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		
@@ -100,6 +103,9 @@ public class OSFrameController implements Initializable{
 		stopBtn.setVisible(false);
 		toLeftBtn.setOnAction(event -> handleToLeftBtnAction(event));			// 추가버튼 Action
 		toRightBtn.setOnAction(event -> handleToRightBtnAction(event)); 		// 삭제버튼 Action
+		
+		tickSlider.setMin(0);
+		tickSlider.setMax(MAX_RUN_TIME + 1);
 	}
 	
 	public static OSFrameController getInstance() {
@@ -128,6 +134,72 @@ public class OSFrameController implements Initializable{
 		});
 	}
 	
+	/* GanttChart의 초기 설정을 진행합니다 */
+	private void initializeGanttChart() {
+		/* 기존 Column과 Row를 삭제합니다 */
+		for(int index = 0; index < ganttPane.getRowConstraints().size(); index++) {
+			ganttPane.getRowConstraints().remove(index);
+		}
+		for(int index = 0; index < ganttPane.getColumnConstraints().size(); index++) {
+			ganttPane.getColumnConstraints().remove(index);
+		}
+		
+		for(int index = 0; index < schedulingTableList.size(); index++) {
+			/* Row를 설정합니다 */
+			RowConstraints row = new RowConstraints();
+			row.setPrefHeight(50);
+			ganttPane.getRowConstraints().add(row);
+		}
+	
+		/* Process 정보 Column을 설정합니다. */
+		ColumnConstraints processColumn = new ColumnConstraints();
+		processColumn.setPrefWidth(60);
+		ganttPane.getColumnConstraints().add(processColumn);
+		
+		/* Column을 설정합니다 */
+		for(int index = 0; index < MAX_RUN_TIME; index++) {
+			ColumnConstraints col = new ColumnConstraints();
+			col.setPrefWidth(60);
+			ganttPane.getColumnConstraints().add(col);
+		}
+		
+		/* GanttChart의 프로세스 정보를 설정합니다 */
+		for(int index = 0; index < schedulingTableList.size(); index++) {
+			schedulingTableModel model = schedulingTableList.get(index);
+			Label label = new Label("P" + model.getProcessNo().get());
+			label.getStyleClass().add("nowRunning");
+			label.setPrefHeight(40);
+			label.setPrefWidth(40);
+			label.setStyle("-fx-background-color:" + toRGBCode(model.getColor()) + " !important;");
+			ganttPane.add(label, 0, index);
+		}
+	}
+	
+	/* GranttChart를 설정합니다 */
+	public void setGanttChart(workSection work, int timeCount) {
+		Platform.runLater(new Runnable() {	
+			@Override
+			public void run() {
+				if(work != null) {
+					/* GanttChart 내 현재 index를 확인합니다 */
+					int index = 0;
+					for(schedulingTableModel model : schedulingTableList) {
+						if(model.getProcessNo().get() == work.getWorkId()) {
+							break;
+						} 
+						index++;
+					}
+					
+					ProgressBar ganttProgress = new ProgressBar();
+					ganttProgress.getStyleClass().add("ganttProgressBar");
+					ganttProgress.setStyle("-fx-accent:" + toRGBCode(work.getColor()) + " !important");
+					ganttProgress.setProgress(1.0);
+					staticGanttPane.add(ganttProgress, timeCount, index);
+				}
+			}
+		});
+	}
+	
 	/* 프로세스 Visualizer를 설정합니다 */
 	public void setProcessStatus(workSection work) {
 		Platform.runLater(new Runnable() {
@@ -141,7 +213,7 @@ public class OSFrameController implements Initializable{
 	}
 	
 	/* 현재 프로세스 정보를 설정합니다 */
-	public static void setNowProcessing(workSection work) {
+	public void setNowProcessing(workSection work) {
 		Platform.runLater(new Runnable() {		
 			@Override
 			public void run() {
@@ -156,10 +228,8 @@ public class OSFrameController implements Initializable{
 					double progressPoint = 0.0;
 					if(work.getOverWorkCnt() <= 0) progressPoint = 1.0;
 					else {
-						System.out.println(work);
 						progressPoint = ((double) work.getWorkCnt() - (double) work.getOverWorkCnt()) / (double) work.getWorkCnt();
 					}
-					System.out.println(progressPoint);
 					staticProgressBar.setProgress(progressPoint);
 				}
 			}
@@ -213,7 +283,7 @@ public class OSFrameController implements Initializable{
 			processStatus.setItems(processStatusList);
 			
 			/* Gantt Chart 설정 */
-			
+			initializeGanttChart();			// 간트 차트를 초기화합니다.
 			
 			scheduling.setScheduling(schedulingList, timeQuantum, coreSet);
 			scheduling.runScheduling();
@@ -251,6 +321,10 @@ public class OSFrameController implements Initializable{
 			return false;
 		}
 		return true;
+		
+	}
+	
+	public void stopProcess() {
 		
 	}
 	
@@ -357,8 +431,6 @@ public class OSFrameController implements Initializable{
 			Platform.runLater(new Runnable() {
 				@Override
 				public void run() {
-					// TODO Auto-generated method stub
-					System.out.println(schedulingTableList.size());
 					schedulingTableList.remove(schedulingTableList.size() - 1);
 				}
 			});

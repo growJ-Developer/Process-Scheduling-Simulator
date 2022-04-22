@@ -1,6 +1,8 @@
 package scheduling;
 
 import java.util.*;
+
+import javafx.event.Event;
 import main.OSFrameController;
 import util.*;
 
@@ -60,10 +62,11 @@ public class SRTNScheduling extends scheduling{
 		isRunning = false;
 	}
 	
+	@Override
 	public void rawRunScheduling() throws Exception{
 		while(isRunning) {
-			if(nowTime >= 31) 	isRunning = false;
-			else 				nowTime++;
+			if(nowTime >= OSFrameController.MAX_RUN_TIME) 	isRunning = false;
+			else 											nowTime++;
 			
 			/* ReadyQueue를 설정합니다 */
 			setReadyQueue();
@@ -71,10 +74,8 @@ public class SRTNScheduling extends scheduling{
 			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
 			if(readyQueue.size() != 0) 	nowWork = getBestWork();
 			
-			/* 현재 진행중인 작업을 설정합니다(Draw) */
-			OSFrameController.getInstance().setProcessStatus(nowWork);
-			OSFrameController.getInstance().setNowProcessing(nowWork);
-			OSFrameController.getInstance().setReadyQueueStatus(readyQueue);
+			/* UI를 설정합니다 (반드시, 여기서 호출해야 함) */
+			setUIComponent();
 			
 			/* 작업을 진행한뒤, 잔여시간을 체크하여, endList로 옮깁니다 */
 			if(nowWork != null) {
@@ -85,9 +86,20 @@ public class SRTNScheduling extends scheduling{
 				}
 			}
 			
+			checkDoneProcess();
+			
 			/* 1초 간격으로 실행합니다 */
 			mThread.sleep(1000);
 		}
+	}
+	
+	/* 현재 진행중인 작업을 설정합니다(Draw) */
+	@Override
+	public void setUIComponent() {
+		OSFrameController.getInstance().setProcessStatus(nowWork);
+		OSFrameController.getInstance().setNowProcessing(nowWork);
+		OSFrameController.getInstance().setReadyQueueStatus(readyQueue);
+		OSFrameController.getInstance().setGanttChart(nowWork, nowTime);
 	}
 	
 	/* 최적의 작업을 찾습니다 */
@@ -95,6 +107,15 @@ public class SRTNScheduling extends scheduling{
 	public workSection getBestWork() {
 		if (nowWork != null)	readyQueue.add(nowWork);		// 현재 작업 반영
 		return readyQueue.poll();
+	}
+	
+	/* 작업을 완료했는지 확인합니다 */
+	@Override
+	public void checkDoneProcess() {
+		/* ReadyQueue와 workList가 모두 비어있으면, 작업을 종료합니다 */
+		if(readyQueue.size() == 0 && workList.size() == 0) {
+			isRunning = false;
+		}
 	}
 	
 	/* 도착한 작업들을 Queue에 넣습니다 */

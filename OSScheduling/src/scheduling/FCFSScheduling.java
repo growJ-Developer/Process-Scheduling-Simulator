@@ -31,7 +31,7 @@ public class FCFSScheduling extends scheduling{
 		workList = new PriorityQueue<>();
 		readyQueue = new PriorityQueue<>();
 		endList = new LinkedList<>();
-		nowTime = 0;
+		nowTime = -1;
 		timeQuantum = Integer.MAX_VALUE;
 	}
 	
@@ -107,7 +107,7 @@ public class FCFSScheduling extends scheduling{
 	@Override
 	public void checkDoneProcess() {
 		/* ReadyQueue와 workList가 모두 비어있으면, 작업을 종료합니다 */
-		if(readyQueue.size() == 0 && workList.size() == 0) {
+		if (readyQueue.size() == 0 && workList.size() == 0 && nowWork == null) {
 			isRunning = false;
 		}
 	}

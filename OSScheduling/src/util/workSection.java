@@ -11,6 +11,8 @@ public class workSection implements Comparable<workSection>{
 	private int overWorkCnt;		// 남은 작업의 수
 	private int waitingTime;		// 대기 시간
 	private double ratio;			// 시간 비
+	private static int workStaticIndex = 0;
+	private int workIndex;			// 순번
 	private Color color;			// 프로세스 색상
 	
 	public workSection(int workId, int arrivalTime, int workCnt, Color color) {
@@ -21,6 +23,7 @@ public class workSection implements Comparable<workSection>{
 		this.color = color;
 		this.waitingTime = 0;
 		this.ratio = 0.0;
+		this.workIndex = workStaticIndex++;
 	}
 	
 	@Override
@@ -36,7 +39,7 @@ public class workSection implements Comparable<workSection>{
 	
 	@Override
 	public String toString() {
-		return "workId : " + workId + " arrivalTime : " + arrivalTime + " workCnt : " + workCnt + " overWornCnt : " + overWorkCnt; 
+		return "workId : " + workId + " arrivalTime : " + arrivalTime + " workCnt : " + workCnt + " overWornCnt : " + overWorkCnt + " waiting Time : " + waitingTime; 
 	}
 	
 	public int getOverWorkCnt() {
@@ -77,5 +80,11 @@ public class workSection implements Comparable<workSection>{
 	}
 	public void setWaitingTime(int waitingTime) {
 		this.waitingTime = waitingTime;
+	}
+	public void updateWorkIndex() {
+		this.workIndex = workStaticIndex++;
+	}
+	public int getWorkIndex() {
+		return workIndex;
 	}
 }

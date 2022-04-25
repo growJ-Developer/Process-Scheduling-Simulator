@@ -194,7 +194,7 @@ public class OSFrameController implements Initializable{
 					ganttProgress.getStyleClass().add("ganttProgressBar");
 					ganttProgress.setStyle("-fx-accent:" + toRGBCode(work.getColor()) + " !important");
 					ganttProgress.setProgress(1.0);
-					staticGanttPane.add(ganttProgress, timeCount, index);
+					staticGanttPane.add(ganttProgress, timeCount + 1, index);
 				}
 			}
 		});
@@ -309,17 +309,20 @@ public class OSFrameController implements Initializable{
 			return false;
 		}
 	
-		String timeQuantum = timeQuantumInput.getText();
+		String timeQuantumStr = timeQuantumInput.getText();
 		/* TimeQuantum 확인 */
-		if(!timeQuantumInput.isDisable() && timeQuantum.length() <= 0) {
+		if(!timeQuantumInput.isDisable() && timeQuantumStr.length() <= 0) {
 			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "Please wirte the timeQuantum.");
 			alert.showAlert();
 			return false;
-		} else if(!timeQuantumInput.isDisable() && Integer.parseInt(timeQuantum) <= 0) {
+		} else if(!timeQuantumInput.isDisable() && Integer.parseInt(timeQuantumStr) <= 0) {
 			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "The timeQuantum must be at least zero.");
 			alert.showAlert();
 			return false;
+		} else if(!timeQuantumInput.isDisable()) {
+			timeQuantum = Integer.parseInt(timeQuantumStr);
 		}
+		
 		return true;
 		
 	}
@@ -351,6 +354,7 @@ public class OSFrameController implements Initializable{
 		coreSet = new coreUtil(pCoreCnt, eCoreCnt);
 	}
 	
+	/* 코어정보 설정을 제어합니다 */
 	private void handleCoreSelectAction() {
 		ObservableList<MenuItem> menuList = pCoreSelect.getItems();
 		
@@ -383,16 +387,16 @@ public class OSFrameController implements Initializable{
 			scheduling = new FCFSScheduling();
 			break;
 		case "Round-Robin":
-			scheduling = new SRTNScheduling();
+			scheduling = new RRScheduling();
 			break;
 		case "SPN":
-			scheduling = new SRTNScheduling();
+			scheduling = new SPNScheduling();
 			break;
 		case "SRTN":
 			scheduling = new SRTNScheduling();
 			break;
 		case "HRRN":
-			scheduling = new SRTNScheduling();
+			scheduling = new HRRNScheduling();
 			break;
 		}
 	}

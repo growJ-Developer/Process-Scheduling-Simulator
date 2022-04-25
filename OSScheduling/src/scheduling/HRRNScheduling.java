@@ -37,7 +37,7 @@ public class HRRNScheduling extends scheduling{
 			else return 0;
 		});
 		endList = new LinkedList<>();
-		nowTime = 0;
+		nowTime = -1;
 		timeQuantum = Integer.MAX_VALUE;
 	}
 	
@@ -105,15 +105,15 @@ public class HRRNScheduling extends scheduling{
 	/* 최적의 작업을 찾습니다 */
 	@Override
 	public workSection getBestWork() {
-		if (nowWork != null)	readyQueue.add(nowWork);		// 현재 작업 반영
-		return readyQueue.poll();
+		if (nowWork == null)	return readyQueue.poll();
+		else					return null;
 	}
 	
 	/* 작업을 완료했는지 확인합니다 */
 	@Override
 	public void checkDoneProcess() {
 		/* ReadyQueue와 workList가 모두 비어있으면, 작업을 종료합니다 */
-		if(readyQueue.size() == 0 && workList.size() == 0) {
+		if (readyQueue.size() == 0 && workList.size() == 0 && nowWork == null) {
 			isRunning = false;
 		}
 	}
@@ -121,8 +121,24 @@ public class HRRNScheduling extends scheduling{
 	/* 도착한 작업들을 Queue에 넣습니다 */
 	@Override
 	public void setReadyQueue() {
+		ArrayList<workSection> tmpQueue = new ArrayList<>();
+		/* Waiting Time을 반영합니다 */
+		for(int index = 0; index < readyQueue.size(); index++) {
+			workSection work = readyQueue.poll();
+			work.setWaitingTime(work.getWaitingTime() + 1);
+			
+			/* HRRN의 경우, Response Ratio를 계산합니다 */
+			work.setRatio((work.getWaitingTime() + work.getWorkCnt()) / work.getWorkCnt());
+			
+			tmpQueue.add(work);
+		}
+		/* 반영한 내용을 ReadyQueue에 반영합니다 */
+		for(workSection work : tmpQueue) {
+			readyQueue.add(work);
+		}
+		
 		for(int index = 0; index < workList.size(); index++) {
-			workSection work = workList.poll();
+			workSection work = workList.poll();			
 			if(work.getArrivalTime() <= nowTime) {
 				readyQueue.add(work);
 			} else {

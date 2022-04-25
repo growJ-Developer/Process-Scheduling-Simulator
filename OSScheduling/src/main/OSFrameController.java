@@ -380,7 +380,7 @@ public class OSFrameController implements Initializable{
 		
 		switch (schedulingType) {
 		case "FCFS":
-			scheduling = new SRTNScheduling();
+			scheduling = new FCFSScheduling();
 			break;
 		case "Round-Robin":
 			scheduling = new SRTNScheduling();

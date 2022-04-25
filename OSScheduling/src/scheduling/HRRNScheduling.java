@@ -30,10 +30,10 @@ public class HRRNScheduling extends scheduling{
 		nowWork = null;
 		workList = new PriorityQueue<>();
 		readyQueue = new PriorityQueue<workSection>((o1, o2) -> {
-			if(o1.getOverWorkCnt() > o2.getOverWorkCnt()) 		return 1;
-			else if(o1.getOverWorkCnt() < o2.getOverWorkCnt()) 	return -1;
-			else if(o1.getWorkId() > o2.getWorkId())			return 1;
-			else if(o1.getWorkId() < o2.getWorkId())			return -1;
+			if(o1.getRatio() > o2.getRatio())					return -1;
+			else if(o1.getRatio() < o2.getRatio())				return 1;
+			else if(o1.getArrivalTime() < o2.getArrivalTime())	return 1;
+			else if(o1.getArrivalTime() > o2.getArrivalTime())	return -1;
 			else return 0;
 		});
 		endList = new LinkedList<>();
@@ -71,8 +71,8 @@ public class HRRNScheduling extends scheduling{
 			/* ReadyQueue를 설정합니다 */
 			setReadyQueue();
 			
-			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
-			if(readyQueue.size() != 0) 	nowWork = getBestWork();
+			/* 현재 작업중인 프로세스가 없다면, 작업을 가져옵니다. */
+			if(nowWork == null) 	nowWork = getBestWork();
 			
 			/* UI를 설정합니다 (반드시, 여기서 호출해야 함) */
 			setUIComponent();

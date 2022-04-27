@@ -71,7 +71,7 @@ public class FCFSScheduling extends scheduling{
 			setReadyQueue();
 			
 			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
-			if(readyQueue.size() != 0) 	nowWork = getBestWork();
+			if(nowWork == null) 	nowWork = getBestWork();
 			
 			/* UI를 설정합니다 (반드시, 여기서 호출해야 함) */
 			setUIComponent();
@@ -104,8 +104,8 @@ public class FCFSScheduling extends scheduling{
 	/* 최적의 작업을 찾습니다 */
 	@Override
 	public workSection getBestWork() {
-		if (nowWork != null)	readyQueue.add(nowWork);		// 현재 작업 반영
-		return readyQueue.poll();
+		if (nowWork == null)	return readyQueue.poll();
+		else					return null;
 	}
 	
 	/* 작업을 완료했는지 확인합니다 */

@@ -18,7 +18,6 @@ public class FCFSScheduling extends scheduling{
 	private workSection nowWork;
 	private int nowTime;
 	
-	
 	/* SRTN Scheduling을 수행합니다 */
 	public FCFSScheduling() {
 		init();
@@ -29,7 +28,13 @@ public class FCFSScheduling extends scheduling{
 		isRunning = false;
 		nowWork = null;
 		workList = new PriorityQueue<>();
-		readyQueue = new PriorityQueue<>();
+		readyQueue = new PriorityQueue<workSection>((o1, o2) -> {
+			if(o1.getArrivalTime() > o2.getArrivalTime()) 		return 1;
+			else if(o1.getArrivalTime() < o2.getArrivalTime()) 	return -1;
+			else if(o1.getWorkId() > o2.getWorkId())			return 1;
+			else if(o1.getWorkId() < o2.getWorkId())			return -1;
+			else return 0;
+		});
 		endList = new LinkedList<>();
 		nowTime = -1;
 		timeQuantum = Integer.MAX_VALUE;

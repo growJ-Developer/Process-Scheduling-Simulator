@@ -18,7 +18,6 @@ public class SPNScheduling extends scheduling{
 	private workSection nowWork;
 	private int nowTime;
 	
-	
 	/* SRTN Scheduling을 수행합니다 */
 	public SPNScheduling() {
 		init();
@@ -30,8 +29,8 @@ public class SPNScheduling extends scheduling{
 		nowWork = null;
 		workList = new PriorityQueue<>();
 		readyQueue = new PriorityQueue<workSection>((o1, o2) -> {
-			if(o1.getOverWorkCnt() > o2.getOverWorkCnt()) 		return 1;
-			else if(o1.getOverWorkCnt() < o2.getOverWorkCnt()) 	return -1;
+			if(o1.getWorkCnt() > o2.getWorkCnt()) 				return 1;
+			else if(o1.getWorkCnt() < o2.getWorkCnt()) 			return -1;
 			else if(o1.getWorkId() > o2.getWorkId())			return 1;
 			else if(o1.getWorkId() < o2.getWorkId())			return -1;
 			else return 0;
@@ -72,7 +71,7 @@ public class SPNScheduling extends scheduling{
 			setReadyQueue();
 			
 			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
-			if(readyQueue.size() != 0) 	nowWork = getBestWork();
+			if(nowWork == null) 	nowWork = getBestWork();
 			
 			/* UI를 설정합니다 (반드시, 여기서 호출해야 함) */
 			setUIComponent();
@@ -86,7 +85,7 @@ public class SPNScheduling extends scheduling{
 				}
 			}
 			
-			checkDoneProcess();
+			//checkDoneProcess();
 			
 			/* 1초 간격으로 실행합니다 */
 			mThread.sleep(1000);
@@ -105,8 +104,8 @@ public class SPNScheduling extends scheduling{
 	/* 최적의 작업을 찾습니다 */
 	@Override
 	public workSection getBestWork() {
-		if (nowWork != null)	readyQueue.add(nowWork);		// 현재 작업 반영
-		return readyQueue.poll();
+		if (nowWork == null)	return readyQueue.poll();
+		else					return null;
 	}
 	
 	/* 작업을 완료했는지 확인합니다 */

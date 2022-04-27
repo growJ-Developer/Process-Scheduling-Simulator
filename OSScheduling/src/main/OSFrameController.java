@@ -409,7 +409,8 @@ public class OSFrameController implements Initializable{
 			int burstTime = Integer.parseInt(burstTimeInput.getText());
 			
 			schedulingTableModel model = new schedulingTableModel(arrivalTime, burstTime);
-			listTable.getItems().add(model);
+			
+			//listTable.getItems().add(model);
 		}
 	}
 	
@@ -423,6 +424,8 @@ public class OSFrameController implements Initializable{
 			schedulingTableModel row = it.next();
 			int index = schedulingTableList.indexOf(row);
 			
+			schedulingTableList.remove(index);
+			
 			/* 삭제 뒤에 색상 지우기를 위해 빈 요소 삽입후 삭제합니다 */
 			schedulingTableModel blank = new schedulingTableModel();
 			blank.setProcessNo(-1);
@@ -430,14 +433,7 @@ public class OSFrameController implements Initializable{
 			blank.setEmpty(true);
 			schedulingTableList.add(blank);
 			
-			schedulingTableList.remove(index);
-			
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					schedulingTableList.remove(schedulingTableList.size() - 1);
-				}
-			});
+			schedulingTableList.remove(schedulingTableList.size() - 1);
 			
 		}
 	}	

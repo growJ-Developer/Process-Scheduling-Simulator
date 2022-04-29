@@ -136,6 +136,7 @@
                   <MenuItem mnemonicParsing="false" text="SPN" />
                   <MenuItem mnemonicParsing="false" text="SRTN" />
                   <MenuItem mnemonicParsing="false" text="HRRN" />
+                <MenuItem mnemonicParsing="false" text="Dynamic-Round-Robin" />
               </items>
                <styleClass>
                   <String fx:value="split-menu-btn-default" />

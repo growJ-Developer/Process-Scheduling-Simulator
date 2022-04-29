@@ -398,6 +398,9 @@ public class OSFrameController implements Initializable{
 		case "HRRN":
 			scheduling = new HRRNScheduling();
 			break;
+		case "Dynamic-Round-Robin":
+			scheduling = new DynamicRRScheduling();
+			break;
 		}
 	}
 	
@@ -410,7 +413,7 @@ public class OSFrameController implements Initializable{
 			
 			schedulingTableModel model = new schedulingTableModel(arrivalTime, burstTime);
 			
-			//listTable.getItems().add(model);
+			listTable.getItems().add(model);
 		}
 	}
 	

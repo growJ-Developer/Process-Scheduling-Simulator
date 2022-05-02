@@ -72,13 +72,20 @@ public class DynamicRRScheduling extends scheduling{
 			
 			if(nowWork != null)								nowQuantum++;
 			
-			/* ReadyQueue를 설정합니다 */
+			/* ReadyQueue를 설정합니다  */
 			setReadyQueue();
 			
-			timeQuantum = 0;
+		
+			/*commit하고싶어 시켜줘 */
 			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
 			if(nowQuantum % timeQuantum == 0 || nowWork == null) 	{
 				nowWork = getBestWork();
+	            /* 3번째 아이디어 현재하는 일을 실시간 반영해서 남은일이랑 timeQuantum비교해서 증감 대신에 한계선은 존재함*/				
+				int leftover=nowWork.getOverWorkCnt();
+				if( leftover>=this.timeQuantum&&this.timeQuantum<10)
+					this.timeQuantum++;
+				else if( leftover<this.timeQuantum&&this.timeQuantum>2)
+					this.timeQuantum--;						
 				nowQuantum = 0;
 			}
 			
@@ -152,6 +159,7 @@ public class DynamicRRScheduling extends scheduling{
 	/* 도착한 작업들을 Queue에 넣습니다 */
 	@Override
 	public void setReadyQueue() {
+		int totalwork=0;
 		for(int index = 0; index < workList.size(); index++) {
 			workSection work = workList.poll();
 			work.updateWorkIndex();
@@ -161,13 +169,14 @@ public class DynamicRRScheduling extends scheduling{
 				workList.add(work);
 			}
 		}
+		
 	}
 	
 	/* 스케줄링 정보를 설정합니다. */
 	@Override
 	public void setScheduling( PriorityQueue<workSection> schedulinList, int timeQuantum, coreUtil coreSet) {
 		this.workList = schedulinList;
-		this.timeQuantum = timeQuantum;
+		this.timeQuantum =2;
 		this.coreSet = coreSet;
 	}
 	

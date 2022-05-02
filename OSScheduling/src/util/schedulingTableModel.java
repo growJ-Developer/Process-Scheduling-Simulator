@@ -2,8 +2,12 @@ package util;
 
 import java.util.Random;
 
+import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
 
 /* 스케줄링 테이블 모델 클래스 */
@@ -14,7 +18,7 @@ public class schedulingTableModel {
 	private final IntegerProperty burstTime;
 	private final IntegerProperty waitingTime;
 	private final IntegerProperty turnaroundTime;
-	private final IntegerProperty normalizedTime;
+	private final StringProperty normalizedTime;
 	private Color color;
 	private boolean isEmpty;
 	
@@ -25,7 +29,7 @@ public class schedulingTableModel {
 		this.burstTime = new SimpleIntegerProperty();
 		this.waitingTime = new SimpleIntegerProperty();
 		this.turnaroundTime = new SimpleIntegerProperty();
-		this.normalizedTime = new SimpleIntegerProperty();
+		this.normalizedTime = new SimpleStringProperty();
 		this.isEmpty = false;
 		
 		Random rand = new Random();
@@ -94,11 +98,11 @@ public class schedulingTableModel {
 		return turnaroundTime;
 	}
 	
-	public void setNormalizedTime(int normalizedTime) {
+	public void setNormalizedTime(String normalizedTime) {
 		this.normalizedTime.set(normalizedTime);
 	}
 
-	public IntegerProperty getNormalizedTime() {
+	public StringProperty getNormalizedTime() {
 		return normalizedTime;
 	}
 	

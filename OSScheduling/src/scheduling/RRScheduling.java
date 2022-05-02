@@ -29,7 +29,7 @@ public class RRScheduling extends scheduling{
 	public void init() {
 		isRunning = false;
 		nowWork = null;
-		workList = new PriorityQueue<>();
+		workList = new PriorityQueue<workSection>();
 		readyQueue = new PriorityQueue<workSection>((o1, o2) -> {
 			if(o1.getWorkIndex() > o2.getWorkIndex()) 			return 1;
 			else if(o1.getWorkIndex() < o2.getWorkIndex()) 		return -1;
@@ -85,18 +85,35 @@ public class RRScheduling extends scheduling{
 			setUIComponent();
 			
 			/* 작업을 진행한뒤, 잔여시간을 체크하여, endList로 옮깁니다 */
-			if(nowWork != null) {
-				nowWork.setOverWorkCnt(nowWork.getOverWorkCnt() - coreSet.getWorkByCore());
-				if(nowWork.getOverWorkCnt() <= 0) {
-					endList.add(nowWork);
-					nowWork = null;
-				}
-			}
+			workAction();
 			
 			checkDoneProcess();
 			
 			/* 1초 간격으로 실행합니다 */
 			mThread.sleep(1000);
+		}
+	}
+	
+	/* 작업을 실행합니다 */
+	@Override
+	public void workAction() {
+		/* 작업을 진행한뒤, 잔여시간을 체크하여, endList로 옮깁니다 */
+		if(nowWork != null) {
+			nowWork.setOverWorkCnt(nowWork.getOverWorkCnt() - coreSet.getWorkByCore());
+			if(nowWork.getOverWorkCnt() <= 0) {
+				endList.add(nowWork);
+				nowWork = null;
+			}
+		}
+		setListTable();
+	}
+	
+	/* EndList를 이용하여, Process Table을 설정합니다 */
+	@Override
+	public void setListTable() {
+		for(int index = 0; index < endList.size(); index++) {
+			workSection work = endList.poll();
+			OSFrameController.getInstance().setDoneProcess(work, nowTime);
 		}
 	}
 	
@@ -106,7 +123,7 @@ public class RRScheduling extends scheduling{
 		OSFrameController.getInstance().setProcessStatus(nowWork);
 		OSFrameController.getInstance().setNowProcessing(nowWork);
 		OSFrameController.getInstance().setReadyQueueStatus(readyQueue);
-		OSFrameController.getInstance().setGanttChart(nowWork, nowTime);
+		OSFrameController.getInstance().setGanttChart(nowWork, nowTime); 
 	}
 	
 	/* 최적의 작업을 찾습니다 */
@@ -128,6 +145,7 @@ public class RRScheduling extends scheduling{
 		/* ReadyQueue와 workList가 모두 비어있으면, 작업을 종료합니다 */
 		if (readyQueue.size() == 0 && workList.size() == 0 && nowWork == null) {
 			isRunning = false;
+			OSFrameController.staticStopBtn.fire();
 		}
 	}
 	
@@ -161,7 +179,7 @@ public class RRScheduling extends scheduling{
 	@Override
 	public PriorityQueue<workSection> getReadyQueue() {
 		// TODO Auto-generated method stub
-		return null;
+		return readyQueue;
 	}
 	
 	@Override

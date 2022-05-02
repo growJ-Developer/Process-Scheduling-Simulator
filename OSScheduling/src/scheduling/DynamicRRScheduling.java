@@ -76,7 +76,7 @@ public class DynamicRRScheduling extends scheduling{
 			setReadyQueue();
 			
 		
-					
+			/*commit하고싶어*/
 			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
 			if(nowQuantum % timeQuantum == 0 || nowWork == null) 	{
 				nowWork = getBestWork();

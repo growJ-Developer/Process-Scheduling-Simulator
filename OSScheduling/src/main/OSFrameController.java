@@ -421,6 +421,8 @@ public class OSFrameController implements Initializable{
 			timeQuantumInput.setDisable(true);
 			pCoreSelect.setDisable(true);
 			eCoreSelect.setDisable(true);
+			toLeftBtn.setVisible(false);
+			toRightBtn.setVisible(false);
 			
 			/* Visualize 초기화 */
 			processStatusList.clear();
@@ -447,6 +449,8 @@ public class OSFrameController implements Initializable{
 		setTimeQuantumDisable(schedulingTypeSelect.getText());
 		pCoreSelect.setDisable(false);
 		eCoreSelect.setDisable(false);
+		toLeftBtn.setVisible(true);
+		toRightBtn.setVisible(true);
 	}
 	
 	/* Scheduling 추가 버튼에 대한 Action을 지정합니다 */

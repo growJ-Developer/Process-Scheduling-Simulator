@@ -6,7 +6,7 @@ import javafx.event.Event;
 import main.OSFrameController;
 import util.*;
 
-public class DynamicRRScheduling extends scheduling{
+public class SRTNScheduling extends scheduling{
 	private boolean isRunning;
 	private Thread mThread;
 	private int timeQuantum;
@@ -17,11 +17,10 @@ public class DynamicRRScheduling extends scheduling{
 	private coreUtil coreSet;
 	private workSection nowWork;
 	private int nowTime;
-	private int nowQuantum;
 	
 	
 	/* SRTN Scheduling을 수행합니다 */
-	public DynamicRRScheduling() {
+	public SRTNScheduling() {
 		init();
 	}
 	
@@ -31,8 +30,8 @@ public class DynamicRRScheduling extends scheduling{
 		nowWork = null;
 		workList = new PriorityQueue<>();
 		readyQueue = new PriorityQueue<workSection>((o1, o2) -> {
-			if(o1.getWorkIndex() > o2.getWorkIndex()) 			return 1;
-			else if(o1.getWorkIndex() < o2.getWorkIndex()) 		return -1;
+			if(o1.getOverWorkCnt() > o2.getOverWorkCnt()) 		return 1;
+			else if(o1.getOverWorkCnt() < o2.getOverWorkCnt()) 	return -1;
 			else if(o1.getWorkId() > o2.getWorkId())			return 1;
 			else if(o1.getWorkId() < o2.getWorkId())			return -1;
 			else return 0;
@@ -40,7 +39,6 @@ public class DynamicRRScheduling extends scheduling{
 		endList = new LinkedList<>();
 		nowTime = -1;
 		timeQuantum = Integer.MAX_VALUE;
-		nowQuantum = 0;
 	}
 	
 	@Override
@@ -70,17 +68,11 @@ public class DynamicRRScheduling extends scheduling{
 			if(nowTime >= OSFrameController.MAX_RUN_TIME) 	isRunning = false;
 			else 											nowTime++;
 			
-			if(nowWork != null)								nowQuantum++;
-			
 			/* ReadyQueue를 설정합니다 */
 			setReadyQueue();
 			
-			timeQuantum = 0;
 			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
-			if(nowQuantum % timeQuantum == 0 || nowWork == null) 	{
-				nowWork = getBestWork();
-				nowQuantum = 0;
-			}
+			if(readyQueue.size() != 0) 	nowWork = getBestWork();
 			
 			/* UI를 설정합니다 (반드시, 여기서 호출해야 함) */
 			setUIComponent();
@@ -130,14 +122,8 @@ public class DynamicRRScheduling extends scheduling{
 	/* 최적의 작업을 찾습니다 */
 	@Override
 	public workSection getBestWork() {
-		if (nowWork != null) {
-			nowWork.updateWorkIndex();
-			readyQueue.add(nowWork);		// 현재 작업 반영
-			return readyQueue.poll();
-		} else {
-			return readyQueue.poll();
-		}
-		
+		if (nowWork != null)	readyQueue.add(nowWork);		// 현재 작업 반영
+		return readyQueue.poll();
 	}
 	
 	/* 작업을 완료했는지 확인합니다 */
@@ -146,6 +132,7 @@ public class DynamicRRScheduling extends scheduling{
 		/* ReadyQueue와 workList가 모두 비어있으면, 작업을 종료합니다 */
 		if (readyQueue.size() == 0 && workList.size() == 0 && nowWork == null) {
 			isRunning = false;
+			OSFrameController.staticStopBtn.fire();
 		}
 	}
 	
@@ -154,7 +141,6 @@ public class DynamicRRScheduling extends scheduling{
 	public void setReadyQueue() {
 		for(int index = 0; index < workList.size(); index++) {
 			workSection work = workList.poll();
-			work.updateWorkIndex();
 			if(work.getArrivalTime() <= nowTime) {
 				readyQueue.add(work);
 			} else {
@@ -179,7 +165,7 @@ public class DynamicRRScheduling extends scheduling{
 	@Override
 	public PriorityQueue<workSection> getReadyQueue() {
 		// TODO Auto-generated method stub
-		return null;
+		return readyQueue;
 	}
 	
 	@Override

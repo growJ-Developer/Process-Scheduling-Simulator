@@ -6,7 +6,7 @@ import javafx.event.Event;
 import main.OSFrameController;
 import util.*;
 
-public class DynamicRRScheduling extends scheduling{
+public class RRScheduling extends scheduling{
 	private boolean isRunning;
 	private Thread mThread;
 	private int timeQuantum;
@@ -21,7 +21,7 @@ public class DynamicRRScheduling extends scheduling{
 	
 	
 	/* SRTN Scheduling을 수행합니다 */
-	public DynamicRRScheduling() {
+	public RRScheduling() {
 		init();
 	}
 	
@@ -29,7 +29,7 @@ public class DynamicRRScheduling extends scheduling{
 	public void init() {
 		isRunning = false;
 		nowWork = null;
-		workList = new PriorityQueue<>();
+		workList = new PriorityQueue<workSection>();
 		readyQueue = new PriorityQueue<workSection>((o1, o2) -> {
 			if(o1.getWorkIndex() > o2.getWorkIndex()) 			return 1;
 			else if(o1.getWorkIndex() < o2.getWorkIndex()) 		return -1;
@@ -75,7 +75,6 @@ public class DynamicRRScheduling extends scheduling{
 			/* ReadyQueue를 설정합니다 */
 			setReadyQueue();
 			
-			timeQuantum = 0;
 			/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
 			if(nowQuantum % timeQuantum == 0 || nowWork == null) 	{
 				nowWork = getBestWork();
@@ -124,7 +123,7 @@ public class DynamicRRScheduling extends scheduling{
 		OSFrameController.getInstance().setProcessStatus(nowWork);
 		OSFrameController.getInstance().setNowProcessing(nowWork);
 		OSFrameController.getInstance().setReadyQueueStatus(readyQueue);
-		OSFrameController.getInstance().setGanttChart(nowWork, nowTime);
+		OSFrameController.getInstance().setGanttChart(nowWork, nowTime); 
 	}
 	
 	/* 최적의 작업을 찾습니다 */
@@ -146,6 +145,7 @@ public class DynamicRRScheduling extends scheduling{
 		/* ReadyQueue와 workList가 모두 비어있으면, 작업을 종료합니다 */
 		if (readyQueue.size() == 0 && workList.size() == 0 && nowWork == null) {
 			isRunning = false;
+			OSFrameController.staticStopBtn.fire();
 		}
 	}
 	
@@ -179,7 +179,7 @@ public class DynamicRRScheduling extends scheduling{
 	@Override
 	public PriorityQueue<workSection> getReadyQueue() {
 		// TODO Auto-generated method stub
-		return null;
+		return readyQueue;
 	}
 	
 	@Override

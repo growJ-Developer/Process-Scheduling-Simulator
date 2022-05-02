@@ -1,6 +1,7 @@
 package main;
 
 import java.net.*;
+import java.text.DecimalFormat;
 import java.util.*;
 
 import javafx.application.Platform;
@@ -9,8 +10,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.*;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -31,7 +35,7 @@ public class OSFrameController implements Initializable{
 	private double xOffset = 0;
 	private double yOffset = 0;
 	private Stage stage = null;
-	public static int MAX_RUN_TIME = 30;
+	public static int MAX_RUN_TIME = 100;
 	public static int MAX_PROCESS_CNT = 15;
 	private Thread mThread;
 	
@@ -62,6 +66,8 @@ public class OSFrameController implements Initializable{
 	private static ObservableList<workSection> processStatusList = FXCollections.observableArrayList();
 	@FXML private ListView<workSection> processStatus;	
 	@FXML private Slider tickSlider;
+	@FXML private GridPane visualGridPane;
+	@FXML private ScrollPane visualScrollPane;
 	
 	// 스케줄링 리스트
 	private static ObservableList<schedulingTableModel> schedulingTableList = FXCollections.observableArrayList();
@@ -109,8 +115,14 @@ public class OSFrameController implements Initializable{
 		toLeftBtn.setOnAction(event -> handleToLeftBtnAction(event));			// 추가버튼 Action
 		toRightBtn.setOnAction(event -> handleToRightBtnAction(event)); 		// 삭제버튼 Action
 		
+		/* Process Status의 길이를 설정합니다 */
+		visualGridPane.setMinWidth(MAX_RUN_TIME * 30);
+		visualScrollPane.setMaxWidth(MAX_RUN_TIME * 30 + 5);
+		processStatus.setMaxWidth(MAX_RUN_TIME * 30);
+		
 		tickSlider.setMin(0);
-		tickSlider.setMax(MAX_RUN_TIME + 1);
+		tickSlider.setMax(MAX_RUN_TIME);
+		tickSlider.setMaxWidth(MAX_RUN_TIME * 30 - 2);
 	}
 	
 	/* GranttChart를 설정합니다 */
@@ -181,9 +193,12 @@ public class OSFrameController implements Initializable{
 			public void run() {
 				for(schedulingTableModel model : schedulingTableList) {
 					if(model.getProcessNo().get() == work.getWorkId()) {
-						model.setTurnaroundTime(nowTime);
-						model.setWaitingTime(nowTime - work.getWaitingTime());
-						model.setNormalizedTime("" + nowTime / work.getWorkCnt());
+						int TT = nowTime - work.getArrivalTime() + 1;
+						int WT = TT - work.getWorkCnt();
+						float NTT = (float) TT / (float) work.getWorkCnt();
+						model.setTurnaroundTime(TT);
+						model.setWaitingTime(WT);
+						model.setNormalizedTime(new DecimalFormat("#.00").format(NTT));
 					}
 				}
 			}
@@ -302,7 +317,7 @@ public class OSFrameController implements Initializable{
 	}
 
 	/* GanttChart의 초기 설정을 진행합니다 */
-	private void initializeGanttChart() {		
+	private void initializeGanttChart() {	
 		for(int index = 0; index < MAX_PROCESS_CNT; index++) {
 			/* Row를 설정합니다 */
 			RowConstraints row = new RowConstraints();
@@ -312,20 +327,22 @@ public class OSFrameController implements Initializable{
 	
 		/* Process 정보 Column을 설정합니다. */
 		ColumnConstraints processColumn = new ColumnConstraints();
-		processColumn.setPrefWidth(60);
+		processColumn.setPrefWidth(30);
 		ganttPane.getColumnConstraints().add(processColumn);
 		
 		/* Column을 설정합니다 */
 		for(int index = 0; index < MAX_RUN_TIME; index++) {
 			ColumnConstraints col = new ColumnConstraints();
-			col.setPrefWidth(60);
+			col.setPrefWidth(30);
 			ganttPane.getColumnConstraints().add(col);
 		}
 		
 		/* 1행과 1열에 대한 초기값을 설정합니다 */
 		ColumnConstraints initialCol = ganttPane.getColumnConstraints().get(0);
 		RowConstraints initialRow = ganttPane.getRowConstraints().get(0);
-		initialCol.setPrefWidth(60);
+		initialCol.setHalignment(HPos.CENTER);
+		initialCol.setPrefWidth(50);
+		initialRow.setValignment(VPos.CENTER);
 		initialRow.setPrefHeight(50);
 	}
 

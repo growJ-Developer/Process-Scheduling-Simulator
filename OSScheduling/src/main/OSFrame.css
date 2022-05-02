@@ -9,6 +9,22 @@
 
 }
 
+.visualGridPane{
+	-fx-background-color:#ffffff !important;
+}
+
+.visualScrollPane{
+	-fx-background-color:#ffffff !important;
+	-fx-background: #FFFFFF;
+   	-fx-border-color: #FFFFFF;
+}
+
+.visualScrollPane > .viewport{
+	-fx-background-color:#ffffff !important;
+	-fx-background: #FFFFFF;
+   	-fx-border-color: #FFFFFF;
+}
+
 .readyQueue{
 	-fx-background-insets:0;
 	-fx-border-width:0px;

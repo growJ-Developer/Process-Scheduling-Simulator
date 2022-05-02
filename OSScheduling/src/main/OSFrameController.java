@@ -11,6 +11,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.*;
@@ -31,6 +32,7 @@ public class OSFrameController implements Initializable{
 	private double yOffset = 0;
 	private Stage stage = null;
 	public static int MAX_RUN_TIME = 30;
+	public static int MAX_PROCESS_CNT = 15;
 	private Thread mThread;
 	
 	@FXML private GridPane parentPane;
@@ -46,6 +48,7 @@ public class OSFrameController implements Initializable{
 	@FXML private SplitMenuButton eCoreSelect;					// eCore 선택기 
 	@FXML private Button startBtn;								// 시작버튼
 	@FXML private Button stopBtn;								// 정지버튼
+	public static Button staticStopBtn;							// 정지버튼 (Static)
 	@FXML private Button toLeftBtn;								// 스케줄링 추가 
 	@FXML private Button toRightBtn;							// 스케줄링 삭제 
 	
@@ -68,7 +71,7 @@ public class OSFrameController implements Initializable{
 	@FXML private TableColumn<schedulingTableModel, Number> burstTimeColumn;
 	@FXML private TableColumn<schedulingTableModel, Number> waitingTimeColumn;
 	@FXML private TableColumn<schedulingTableModel, Number> turnaroundTimeColumn;
-	@FXML private TableColumn<schedulingTableModel, Number> normalizedTimeColumn;
+	@FXML private TableColumn<schedulingTableModel, String> normalizedTimeColumn;
 	
 	// Ready Queue
 	private static ObservableList<workSection> readyQueueList = FXCollections.observableArrayList();
@@ -87,11 +90,13 @@ public class OSFrameController implements Initializable{
 		initializeTextField();													// Set Numeric Field
 		handleSchedulingSelectAction();											// Scheduling Type Action
 		handleCoreSelectAction();												// Core Selection Action
+		initializeGanttChart();													// GanttChart
 		timeQuantumInput.setDisable(true);
 		
 		staticNowRunning = nowRunning;
 		staticProgressBar = progressBar;
 		staticGanttPane = ganttPane;
+		staticStopBtn = stopBtn;
 		
 		listTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		
@@ -106,73 +111,6 @@ public class OSFrameController implements Initializable{
 		
 		tickSlider.setMin(0);
 		tickSlider.setMax(MAX_RUN_TIME + 1);
-	}
-	
-	public static OSFrameController getInstance() {
-		return singletone;
-	}
-	
-	private void initializeProcessStatus() {
-		processStatus.setOrientation(Orientation.HORIZONTAL);
-		processStatus.setItems(processStatusList);
-		processStatus.setCellFactory(new Callback<ListView<workSection>, ListCell<workSection>>() {
-			@Override
-			public ListCell<workSection> call(ListView<workSection> param) {
-				return new StatusCell();
-			}
-		});
-	}
-	
-	private void initalizeReadyQueue() {
-		readyQueue.setOrientation(Orientation.HORIZONTAL);
-		readyQueue.setItems(readyQueueList);
-		readyQueue.setCellFactory(new Callback<ListView<workSection>, ListCell<workSection>>() {
-			@Override
-			public ListCell<workSection> call(ListView<workSection> param) {
-				return new StatusCell();
-			}
-		});
-	}
-	
-	/* GanttChart의 초기 설정을 진행합니다 */
-	private void initializeGanttChart() {
-		/* 기존 Column과 Row를 삭제합니다 */
-		for(int index = 0; index < ganttPane.getRowConstraints().size(); index++) {
-			ganttPane.getRowConstraints().remove(index);
-		}
-		for(int index = 0; index < ganttPane.getColumnConstraints().size(); index++) {
-			ganttPane.getColumnConstraints().remove(index);
-		}
-		
-		for(int index = 0; index < schedulingTableList.size(); index++) {
-			/* Row를 설정합니다 */
-			RowConstraints row = new RowConstraints();
-			row.setPrefHeight(50);
-			ganttPane.getRowConstraints().add(row);
-		}
-	
-		/* Process 정보 Column을 설정합니다. */
-		ColumnConstraints processColumn = new ColumnConstraints();
-		processColumn.setPrefWidth(60);
-		ganttPane.getColumnConstraints().add(processColumn);
-		
-		/* Column을 설정합니다 */
-		for(int index = 0; index < MAX_RUN_TIME; index++) {
-			ColumnConstraints col = new ColumnConstraints();
-			col.setPrefWidth(60);
-			ganttPane.getColumnConstraints().add(col);
-		}
-		
-		/* GanttChart의 프로세스 정보를 설정합니다 */
-		for(int index = 0; index < schedulingTableList.size(); index++) {
-			schedulingTableModel model = schedulingTableList.get(index);
-			Label label = new Label("P" + model.getProcessNo().get());
-			label.getStyleClass().add("nowRunning");
-			label.setPrefHeight(40);
-			label.setPrefWidth(40);
-			label.setStyle("-fx-background-color:" + toRGBCode(model.getColor()) + " !important;");
-			ganttPane.add(label, 0, index);
-		}
 	}
 	
 	/* GranttChart를 설정합니다 */
@@ -199,7 +137,7 @@ public class OSFrameController implements Initializable{
 			}
 		});
 	}
-	
+
 	/* 프로세스 Visualizer를 설정합니다 */
 	public void setProcessStatus(workSection work) {
 		Platform.runLater(new Runnable() {
@@ -211,7 +149,7 @@ public class OSFrameController implements Initializable{
 		});
 		
 	}
-	
+
 	/* 현재 프로세스 정보를 설정합니다 */
 	public void setNowProcessing(workSection work) {
 		Platform.runLater(new Runnable() {		
@@ -236,6 +174,22 @@ public class OSFrameController implements Initializable{
 		});	
 	}
 	
+	/* 완료된 작업을 설정합니다 */
+	public void setDoneProcess(workSection work, int nowTime) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				for(schedulingTableModel model : schedulingTableList) {
+					if(model.getProcessNo().get() == work.getWorkId()) {
+						model.setTurnaroundTime(nowTime);
+						model.setWaitingTime(nowTime - work.getWaitingTime());
+						model.setNormalizedTime("" + nowTime / work.getWorkCnt());
+					}
+				}
+			}
+		});
+	}
+
 	/* ReadyQueue를 설정합니다 */
 	public void setReadyQueueStatus(PriorityQueue<workSection> readyQueueOrigin) {
 		Platform.runLater(new Runnable() {
@@ -253,42 +207,143 @@ public class OSFrameController implements Initializable{
 		});
 	}
 	
-	
-	
-	/* 시작 버튼에 대한 Action을 지정합니다 */
-	private void handleStartBtnAction(ActionEvent event) {
-		if(checkStartCondition()) {
-			setSchedulingClass();													// 스케줄링 기법 정보 획득
-			setCoreSet();										
-			
-			/* 스케줄러 Queue를 구성합니다 */
-			schedulingList = new PriorityQueue<>();
-			for(schedulingTableModel model : schedulingTableList) {
-				workSection work = new workSection(model.getProcessNo().get(), model.getArrivalTime().get(), model.getBurstTime().get(), model.getColor());
-				schedulingList.add(work);
+	/* 프로세스 중단 작업을 수행합니다 */
+	public void stopProcess() {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				scheduling.stopScheduling();
+				stopBtn.setVisible(false);
+				startBtn.setVisible(true);
+				
+				/* 제어요소 비활성화 */
+				arrivalTimeInput.setDisable(false);
+				burstTimeInput.setDisable(false);
+				setTimeQuantumDisable(schedulingTypeSelect.getText());
+				pCoreSelect.setDisable(false);
+				eCoreSelect.setDisable(false);
 			}
-			
-			stopBtn.setVisible(true);
-			startBtn.setVisible(false);
-			
-			/* 제어요소 비활성화 */
-			arrivalTimeInput.setDisable(true);
-			burstTimeInput.setDisable(true);
-			timeQuantumInput.setDisable(true);
-			pCoreSelect.setDisable(true);
-			eCoreSelect.setDisable(true);
-			
-			/* Visualize 초기화 */
-			processStatusList.clear();
-			processStatus.setItems(processStatusList);
-			
-			/* Gantt Chart 설정 */
-			initializeGanttChart();			// 간트 차트를 초기화합니다.
-			
-			scheduling.setScheduling(schedulingList, timeQuantum, coreSet);
-			scheduling.runScheduling();
+		});
+		
+	}
+
+	public static OSFrameController getInstance() {
+		return singletone;
+	}
+
+	private void initializeProcessStatus() {
+		processStatus.setOrientation(Orientation.HORIZONTAL);
+		processStatus.setItems(processStatusList);
+		processStatus.setCellFactory(new Callback<ListView<workSection>, ListCell<workSection>>() {
+			@Override
+			public ListCell<workSection> call(ListView<workSection> param) {
+				return new StatusCell();
+			}
+		});
+	}
+	
+	private void initalizeReadyQueue() {
+		readyQueue.setOrientation(Orientation.HORIZONTAL);
+		readyQueue.setItems(readyQueueList);
+		readyQueue.setCellFactory(new Callback<ListView<workSection>, ListCell<workSection>>() {
+			@Override
+			public ListCell<workSection> call(ListView<workSection> param) {
+				return new StatusCell();
+			}
+		});
+	}
+	
+	/* 스케줄링 리스트 테이블에 대한 초기화를 진행합니다 */
+	private void initializeListTable() {
+		listTable.setItems(schedulingTableList);
+		processNoColumn.setCellValueFactory(cellData -> cellData.getValue().getProcessNo());
+		processNoColumn.setCellFactory(new Callback<TableColumn<schedulingTableModel,Number>, TableCell<schedulingTableModel,Number>>() {
+			@Override
+			public TableCell<schedulingTableModel, Number> call(TableColumn<schedulingTableModel, Number> param) {
+				return new ProcessCell();
+			}
+		});
+		arrivalTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getArrivalTime());
+		burstTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getBurstTime());
+		waitingTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getWaitingTime());
+		turnaroundTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getTurnaroundTime());
+		normalizedTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getNormalizedTime());
+	}
+
+	/* InputField에 대한 숫자 입력으로 제한합니다 */
+	private void initializeTextField() {
+		arrivalTimeInput.textProperty().addListener(new ChangeListener<String>() {
+		    @Override
+		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
+		        String newValue) {
+		        if (!newValue.matches("\\d*")) {
+		            arrivalTimeInput.setText(newValue.replaceAll("[^\\d]", ""));
+		        }
+		    }
+		});
+		burstTimeInput.textProperty().addListener(new ChangeListener<String>() {
+		    @Override
+		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
+		        String newValue) {
+		        if (!newValue.matches("\\d*")) {
+		            arrivalTimeInput.setText(newValue.replaceAll("[^\\d]", ""));
+		        }
+		    }
+		});
+		timeQuantumInput.textProperty().addListener(new ChangeListener<String>() {
+		    @Override
+		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
+		        String newValue) {
+		        if (!newValue.matches("\\d*")) {
+		            arrivalTimeInput.setText(newValue.replaceAll("[^\\d]", ""));
+		        }
+		    }
+		});
+	}
+
+	/* GanttChart의 초기 설정을 진행합니다 */
+	private void initializeGanttChart() {		
+		for(int index = 0; index < MAX_PROCESS_CNT; index++) {
+			/* Row를 설정합니다 */
+			RowConstraints row = new RowConstraints();
+			row.setPrefHeight(50);
+			ganttPane.getRowConstraints().add(row);
+		}
+	
+		/* Process 정보 Column을 설정합니다. */
+		ColumnConstraints processColumn = new ColumnConstraints();
+		processColumn.setPrefWidth(60);
+		ganttPane.getColumnConstraints().add(processColumn);
+		
+		/* Column을 설정합니다 */
+		for(int index = 0; index < MAX_RUN_TIME; index++) {
+			ColumnConstraints col = new ColumnConstraints();
+			col.setPrefWidth(60);
+			ganttPane.getColumnConstraints().add(col);
 		}
 		
+		/* 1행과 1열에 대한 초기값을 설정합니다 */
+		ColumnConstraints initialCol = ganttPane.getColumnConstraints().get(0);
+		RowConstraints initialRow = ganttPane.getRowConstraints().get(0);
+		initialCol.setPrefWidth(60);
+		initialRow.setPrefHeight(50);
+	}
+
+	/* GanttChart를 초기화합니다 */
+	private void clearGanttChart() {
+		/* GridPane의 기존 객체를 모두 제거합니다 */
+		ganttPane.getChildren().clear();
+		
+		/* GanttChart의 프로세스 정보를 설정합니다 */
+		for(int index = 0; index < schedulingTableList.size(); index++) {
+			schedulingTableModel model = schedulingTableList.get(index);
+			Label label = new Label("P" + model.getProcessNo().get());
+			label.getStyleClass().add("nowRunning");
+			label.setPrefHeight(40);
+			label.setPrefWidth(40);
+			label.setStyle("-fx-background-color:" + toRGBCode(model.getColor()) + " !important;");
+			ganttPane.add(label, 0, index);
+		}
 	}
 	
 	/* 정상 입력 여부를 체크합니다 */
@@ -327,16 +382,47 @@ public class OSFrameController implements Initializable{
 		
 	}
 	
-	public void stopProcess() {
+	/* 시작 버튼에 대한 Action을 지정합니다 */
+	private void handleStartBtnAction(ActionEvent event) {
+		if(checkStartCondition()) {
+			setSchedulingClass();													// 스케줄링 기법 정보 획득
+			setCoreSet();										
+			
+			/* 스케줄러 Queue를 구성합니다 */
+			schedulingList = new PriorityQueue<>();
+			for(schedulingTableModel model : schedulingTableList) {
+				workSection work = new workSection(model.getProcessNo().get(), model.getArrivalTime().get(), model.getBurstTime().get(), model.getColor());
+				schedulingList.add(work);
+			}
+			
+			stopBtn.setVisible(true);
+			startBtn.setVisible(false);
+			
+			/* 제어요소 비활성화 */
+			arrivalTimeInput.setDisable(true);
+			burstTimeInput.setDisable(true);
+			timeQuantumInput.setDisable(true);
+			pCoreSelect.setDisable(true);
+			eCoreSelect.setDisable(true);
+			
+			/* Visualize 초기화 */
+			processStatusList.clear();
+			processStatus.setItems(processStatusList);
+			
+			/* Gantt Chart 초기화 */
+			clearGanttChart();
+			
+			scheduling.setScheduling(schedulingList, timeQuantum, coreSet);
+			scheduling.runScheduling();
+		}
 		
 	}
-	
+
 	/* 정지버튼에 대한 ACtion을 지정합니다. */
 	private void handleStopBtnAction(ActionEvent event) {
 		scheduling.stopScheduling();
 		stopBtn.setVisible(false);
 		startBtn.setVisible(true);
-		
 		
 		/* 제어요소 비활성화 */
 		arrivalTimeInput.setDisable(false);
@@ -346,14 +432,47 @@ public class OSFrameController implements Initializable{
 		eCoreSelect.setDisable(false);
 	}
 	
-	/* 코어정보를 확인하여 반영합니다. */
-	private void setCoreSet() {
-		int pCoreCnt = Integer.parseInt(pCoreSelect.getText());
-		int eCoreCnt = Integer.parseInt(eCoreSelect.getText());
-		
-		coreSet = new coreUtil(pCoreCnt, eCoreCnt);
+	/* Scheduling 추가 버튼에 대한 Action을 지정합니다 */
+	private void handleToLeftBtnAction(ActionEvent event) {
+		if(checkAddScheduleCondition()) {
+			int arrivalTime = Integer.parseInt(arrivalTimeInput.getText());
+			int burstTime = Integer.parseInt(burstTimeInput.getText());
+			
+			schedulingTableModel model = new schedulingTableModel(arrivalTime, burstTime);
+			
+			listTable.getItems().add(model);
+		}
 	}
-	
+
+	/* Scheduling 삭제 버튼에 대한 Action을 지정합니다 */
+	private void handleToRightBtnAction(ActionEvent event) {
+		ObservableList<schedulingTableModel> modelList = listTable.getSelectionModel().getSelectedItems();
+		ArrayList<schedulingTableModel> rows = new ArrayList<>(modelList);
+				
+		/* 선택된 요소들을 확인하여 삭제합니다 */
+		Iterator<schedulingTableModel> it = rows.iterator();
+		while(it.hasNext()) {
+			schedulingTableModel row = it.next();
+			int index = schedulingTableList.indexOf(row);
+			
+			schedulingTableList.remove(index);
+		}
+		
+	}
+
+	/* 최소화 버튼에 대한 Action을 지정합니다 */
+	private void handleMinButtonAction(ActionEvent event) {
+		stage = (Stage) minButton.getScene().getWindow();
+		stage.setIconified(true);
+	}
+
+	/* 닫기 버튼에 대한 Action을 지정합니다 */
+	private void handleCloseButtonAction(ActionEvent event) {
+		stage = (Stage) closeButton.getScene().getWindow();
+		stage.close();
+		System.exit(0);
+	}
+
 	/* 코어정보 설정을 제어합니다 */
 	private void handleCoreSelectAction() {
 		ObservableList<MenuItem> menuList = pCoreSelect.getItems();
@@ -377,6 +496,28 @@ public class OSFrameController implements Initializable{
 		}
 	}
 	
+	/* 스케줄링 종류 선택에 대한 Action을 지정합니다 */
+	private void handleSchedulingSelectAction() {
+		ObservableList<MenuItem> menuList = schedulingTypeSelect.getItems();
+		
+		Iterator<MenuItem> it = menuList.iterator();
+		while(it.hasNext()) {
+			MenuItem menu = it.next();
+			menu.setOnAction(event -> {
+				schedulingTypeSelect.setText(menu.getText());
+				setTimeQuantumDisable(menu.getText());
+			});
+		}
+	}
+
+	/* 코어정보를 확인하여 반영합니다. */
+	private void setCoreSet() {
+		int pCoreCnt = Integer.parseInt(pCoreSelect.getText());
+		int eCoreCnt = Integer.parseInt(eCoreSelect.getText());
+		
+		coreSet = new coreUtil(pCoreCnt, eCoreCnt);
+	}
+
 	/* 스케줄링 정보에 따라서 scheduling Class를 변경합니다 */
 	private void setSchedulingClass() {
 		/* Scheduling Type 정보를 가져옵니다 */
@@ -405,46 +546,29 @@ public class OSFrameController implements Initializable{
 	}
 	
 	
-	/* Scheduling 추가 버튼에 대한 Action을 지정합니다 */
-	private void handleToLeftBtnAction(ActionEvent event) {
-		if(checkAddScheduleCondition()) {
-			int arrivalTime = Integer.parseInt(arrivalTimeInput.getText());
-			int burstTime = Integer.parseInt(burstTimeInput.getText());
-			
-			schedulingTableModel model = new schedulingTableModel(arrivalTime, burstTime);
-			
-			listTable.getItems().add(model);
+	/* TimeQuantum의 활성화 여부를 설정합니다 */
+	private void setTimeQuantumDisable(String text) {
+		switch (text) {
+		case "Round-Robin":
+			timeQuantumInput.setDisable(false);
+			break;
+		default:
+			timeQuantumInput.setDisable(true);
+			break;
 		}
 	}
-	
-	/* Scheduling 삭제 버튼에 대한 Action을 지정합니다 */
-	private void handleToRightBtnAction(ActionEvent event) {
-		ObservableList<schedulingTableModel> modelList = listTable.getSelectionModel().getSelectedItems();
-		ArrayList<schedulingTableModel> rows = new ArrayList<>(modelList);
-		
-		Iterator<schedulingTableModel> it = rows.iterator();
-		while(it.hasNext()) {
-			schedulingTableModel row = it.next();
-			int index = schedulingTableList.indexOf(row);
-			
-			schedulingTableList.remove(index);
-			
-			/* 삭제 뒤에 색상 지우기를 위해 빈 요소 삽입후 삭제합니다 */
-			schedulingTableModel blank = new schedulingTableModel();
-			blank.setProcessNo(-1);
-			blank.setColor(Color.WHITE);
-			blank.setEmpty(true);
-			schedulingTableList.add(blank);
-			
-			schedulingTableList.remove(schedulingTableList.size() - 1);
-			
-		}
-	}	
-	
+
 	/* 스케줄링 추가 조건을 확인합니다 */
 	private boolean checkAddScheduleCondition() {
 		String arrivalTime = arrivalTimeInput.getText();
 		String burstTime = burstTimeInput.getText();
+		
+		/* 스케줄링 항목이 15개를 초과하는지 체크합니다 */
+		if(listTable.getItems().size() >= 15) {
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "The maximum process count is 15.");
+			alert.showAlert();
+			return false;
+		}
 		
 		if(arrivalTime.length() <= 0) {
 			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "Please wirte the arrivalTime.");
@@ -475,80 +599,6 @@ public class OSFrameController implements Initializable{
 		return true;
 	}
 	
-	/* 스케줄링 종류 선택에 대한 Action을 지정합니다 */
-	private void handleSchedulingSelectAction() {
-		ObservableList<MenuItem> menuList = schedulingTypeSelect.getItems();
-		
-		Iterator<MenuItem> it = menuList.iterator();
-		while(it.hasNext()) {
-			MenuItem menu = it.next();
-			menu.setOnAction(event -> {
-				schedulingTypeSelect.setText(menu.getText());
-				setTimeQuantumDisable(menu.getText());
-			});
-		}
-	}
-	
-	/* TimeQuantum의 활성화 여부를 설정합니다 */
-	private void setTimeQuantumDisable(String text) {
-		switch (text) {
-		case "Round-Robin":
-			timeQuantumInput.setDisable(false);
-			break;
-		default:
-			timeQuantumInput.setDisable(true);
-			break;
-		}
-	}
-	
-	/* 스케줄링 리스트 테이블에 대한 초기화를 진행합니다 */
-	private void initializeListTable() {
-		listTable.setItems(schedulingTableList);
-		processNoColumn.setCellValueFactory(cellData -> cellData.getValue().getProcessNo());
-		processNoColumn.setCellFactory(new Callback<TableColumn<schedulingTableModel,Number>, TableCell<schedulingTableModel,Number>>() {
-			@Override
-			public TableCell<schedulingTableModel, Number> call(TableColumn<schedulingTableModel, Number> param) {
-				return new ProcessCell();
-			}
-		});
-		arrivalTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getArrivalTime());
-		burstTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getBurstTime());
-		waitingTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getWaitingTime());
-		turnaroundTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getTurnaroundTime());
-		normalizedTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getNormalizedTime());
-	}
-	
-	/* InputField에 대한 숫자 입력으로 제한합니다 */
-	private void initializeTextField() {
-		arrivalTimeInput.textProperty().addListener(new ChangeListener<String>() {
-		    @Override
-		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
-		        String newValue) {
-		        if (!newValue.matches("\\d*")) {
-		            arrivalTimeInput.setText(newValue.replaceAll("[^\\d]", ""));
-		        }
-		    }
-		});
-		burstTimeInput.textProperty().addListener(new ChangeListener<String>() {
-		    @Override
-		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
-		        String newValue) {
-		        if (!newValue.matches("\\d*")) {
-		            arrivalTimeInput.setText(newValue.replaceAll("[^\\d]", ""));
-		        }
-		    }
-		});
-		timeQuantumInput.textProperty().addListener(new ChangeListener<String>() {
-		    @Override
-		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
-		        String newValue) {
-		        if (!newValue.matches("\\d*")) {
-		            arrivalTimeInput.setText(newValue.replaceAll("[^\\d]", ""));
-		        }
-		    }
-		});
-	}
-	
 	/* 창 드래그에 대한 Action을 지정합니다 */
 	private void stageDragableMoveWindow() {
 		toolBar.setOnMousePressed((event) -> {
@@ -571,19 +621,6 @@ public class OSFrameController implements Initializable{
 		});
 	}
 	
-	/* 최소화 버튼에 대한 Action을 지정합니다 */
-	private void handleMinButtonAction(ActionEvent event) {
-		stage = (Stage) minButton.getScene().getWindow();
-		stage.setIconified(true);
-	}
-	
-	/* 닫기 버튼에 대한 Action을 지정합니다 */
-	private void handleCloseButtonAction(ActionEvent event) {
-		stage = (Stage) closeButton.getScene().getWindow();
-		stage.close();
-		System.exit(0);
-	}
-	
 	private static String toRGBCode(Color color) {
 		return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
 				(int) (color.getBlue() * 255));
@@ -594,13 +631,16 @@ public class OSFrameController implements Initializable{
 		@Override
 		protected void updateItem(workSection item, boolean empty) {
 			super.updateItem(item, empty);
-			if(item != null) {
+			if(empty) {
+				setText("");
+				setBackground(getBackground().fill(Color.WHITE));
+				/* 항목이 비어있는 경우에는, 색을 칠하지 않습니다 */
+			} else if(item != null) {
 				if(processStatusList.size() > 1 && processStatusList.get(processStatusList.size() - 2).getWorkId() == item.getWorkId()) {
 					setText("");
 				} else {
 					setText("P" + item.getWorkId());
 				}
-				
 				setTextFill(Color.WHITE);
 				setBackground(getBackground().fill(item.getColor()));
 				setPrefHeight(30);
@@ -610,8 +650,7 @@ public class OSFrameController implements Initializable{
 				setPadding(new Insets(0, 0, 0, 5));
 				setStyle("-fx-font-size:8px !important;");
 				setStyle("-fx-border-radius:5em;");
-			}
-			
+			}	
 		};
 	}
 
@@ -620,7 +659,15 @@ public class OSFrameController implements Initializable{
 		@Override
 		protected void updateItem(Number item, boolean empty) {
 			super.updateItem(item, empty);
-			if(item != null) {
+			if(empty) {
+				/* 항목이 비어있을 경우에는 Process 텍스트 배경을 설정합니다 */
+				TableRow<schedulingTableModel> tableRow = getTableRow();
+				if(tableRow != null) {
+					schedulingTableModel model = tableRow.getItem();
+					setText("");
+					setStyle("-fx-background-color:" + toRGBCode(Color.WHITE) + " !important;");
+				}	
+			} else if(item != null) {
 				TableRow<schedulingTableModel> tableRow = getTableRow();
 				if(tableRow != null) {
 					schedulingTableModel model = tableRow.getItem();

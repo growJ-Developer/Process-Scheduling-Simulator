@@ -16,11 +16,15 @@ public abstract class scheduling {
 	
 	public abstract void runScheduling();										// Scheduling을 실행합니다.
 	
-	public abstract void rawRunScheduling() throws Exception;					// 본 스케줄링 실행 											
+	public abstract void rawRunScheduling() throws Exception;					// 본 스케줄링 실행
+	
+	public abstract void workAction();											// 작업 수행
+	
+	public abstract void setListTable();										// Process Table 분리
 	
 	public abstract void stopScheduling();										// 스케줄링 정지
 	
-	public abstract void checkDoneProcess();												// 작업 체크
+	public abstract void checkDoneProcess();									// 작업 체크
 	
 	public abstract void setReadyQueue();										// ReadyQueue를 설정합니다.
 	

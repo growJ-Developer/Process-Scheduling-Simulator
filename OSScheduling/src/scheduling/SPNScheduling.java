@@ -29,8 +29,13 @@ public class SPNScheduling extends scheduling{
 		nowWork = null;
 		workList = new PriorityQueue<>();
 		readyQueue = new PriorityQueue<workSection>((o1, o2) -> {
+<<<<<<< HEAD
 			if(o1.getWorkCnt() > o2.getWorkCnt()) 				return 1;
 			else if(o1.getWorkCnt() < o2.getWorkCnt()) 			return -1;
+=======
+			if(o1.getWorkCnt() > o2.getWorkCnt()) 		return 1;
+			else if(o1.getWorkCnt() < o2.getWorkCnt()) 	return -1;
+>>>>>>> branch 'yjh' of https://github.com/byj2102/OSScheduling.git
 			else if(o1.getWorkId() > o2.getWorkId())			return 1;
 			else if(o1.getWorkId() < o2.getWorkId())			return -1;
 			else return 0;
@@ -121,8 +126,13 @@ public class SPNScheduling extends scheduling{
 	/* 최적의 작업을 찾습니다 */
 	@Override
 	public workSection getBestWork() {
+<<<<<<< HEAD
 		if (nowWork == null)	return readyQueue.poll();
 		else					return null;
+=======
+		if (nowWork != null)	return nowWork;		// 현재 작업 반영
+		return readyQueue.poll();
+>>>>>>> branch 'yjh' of https://github.com/byj2102/OSScheduling.git
 	}
 	
 	/* 작업을 완료했는지 확인합니다 */

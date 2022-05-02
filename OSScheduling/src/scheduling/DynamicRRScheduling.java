@@ -72,7 +72,7 @@ public class DynamicRRScheduling extends scheduling{
 			
 			if(nowWork != null)								nowQuantum++;
 			
-			/* ReadyQueue를 설정합니다 */
+			/* ReadyQueue를 설정합니다  */
 			setReadyQueue();
 			
 		

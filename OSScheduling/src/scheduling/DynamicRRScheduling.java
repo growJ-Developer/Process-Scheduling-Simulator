@@ -140,6 +140,7 @@ public class DynamicRRScheduling extends scheduling{
 			readyQueue.add(nowWork);		// 현재 작업 반영
 			return readyQueue.poll();
 		} else {
+			
 			return readyQueue.poll();
 		}
 		

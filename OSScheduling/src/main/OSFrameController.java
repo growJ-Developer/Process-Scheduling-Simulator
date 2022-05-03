@@ -37,7 +37,6 @@ public class OSFrameController implements Initializable{
 	private Stage stage = null;
 	public static int MAX_RUN_TIME = 100;
 	public static int MAX_PROCESS_CNT = 15;
-	private Thread mThread;
 	
 	@FXML private GridPane parentPane;
 	@FXML private HBox toolBar;									

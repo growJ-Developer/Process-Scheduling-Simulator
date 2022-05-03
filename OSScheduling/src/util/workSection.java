@@ -32,6 +32,10 @@ public class workSection implements Comparable<workSection>{
 			return 1;
 		} else if(this.arrivalTime < o.arrivalTime) {
 			return -1;
+		} else if(this.workId > o.workId){
+			return 1;
+		} else if(this.workId < o.workId) {
+			return -1;
 		} else {
 			return 0;
 		}

@@ -18,6 +18,9 @@ public class HRRNScheduling extends scheduling{
 	private workSection nowWork;
 	private int nowTime;
 	
+	private ArrayList<workThread> pThread;			// 성능 코어 쓰레드
+	private ArrayList<workThread> eThread;			// 효율 코어 쓰레드
+	
 	
 	/* SRTN Scheduling을 수행합니다 */
 	public HRRNScheduling() {
@@ -90,14 +93,25 @@ public class HRRNScheduling extends scheduling{
 	/* 작업을 실행합니다 */
 	@Override
 	public void workAction() {
-		/* 작업을 진행한뒤, 잔여시간을 체크하여, endList로 옮깁니다 */
-		if(nowWork != null) {
-			nowWork.setOverWorkCnt(nowWork.getOverWorkCnt() - coreSet.getWorkByCore());
-			if(nowWork.getOverWorkCnt() <= 0) {
-				endList.add(nowWork);
-				nowWork = null;
+		try {
+			/* 작업 진행을 쓰레드를 이용하여 처리합니다 */
+			for(workThread pWorker : pThread) {
+				pWorker.setWork(nowWork);
+				pWorker.run();	
 			}
+			for(workThread eWorker : eThread) {
+				eWorker.setWork(nowWork);
+				eWorker.run();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		
+		if(nowWork.getOverWorkCnt() <= 0) {
+			endList.add(nowWork);
+			nowWork = null;
+		}
+		
 		setListTable();
 	}
 	
@@ -171,6 +185,13 @@ public class HRRNScheduling extends scheduling{
 		this.workList = schedulinList;
 		this.timeQuantum = timeQuantum;
 		this.coreSet = coreSet;
+		
+		/* 코어 정보에 따라 Thread를 구성합니다 */
+		pThread = new ArrayList<workThread>(coreSet.getpCoreCnt());
+		for(int index = 0; index < coreSet.getpCoreCnt(); index++) pThread.add(new workThread(workThread.P_CORE_PERFORMANCE));
+		
+		eThread = new ArrayList<workThread>(coreSet.geteCoreCnt());
+		for(int index = 0; index < coreSet.geteCoreCnt(); index++) eThread.add(new workThread(workThread.E_CORE_PERFORMANCE));
 	}
 	
 	@Override

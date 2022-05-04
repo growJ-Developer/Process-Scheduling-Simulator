@@ -5,15 +5,15 @@ import java.util.Random;
 import javafx.scene.paint.Color;
 
 public class workSection implements Comparable<workSection>{
-	private int workId;				// work 고유 번호(자동 증가)
-	private int arrivalTime;		// 작업 도착 시간 
-	private int workCnt;			// 작업의 수
-	private int overWorkCnt;		// 남은 작업의 수
-	private int waitingTime;		// 대기 시간
-	private double ratio;			// 시간 비
 	private static int workStaticIndex = 0;
-	private int workIndex;			// 순번
-	private Color color;			// 프로세스 색상
+	private int workId;							// work 고유 번호(자동 증가)
+	private int arrivalTime;					// 작업 도착 시간 
+	private int workCnt;						// 작업의 수
+	private int overWorkCnt;					// 남은 작업의 수
+	private int waitingTime;					// 대기 시간
+	private double ratio;						// 시간 비
+	private int workIndex;						// 순번
+	private Color color;						// 프로세스 색상
 	
 	public workSection(int workId, int arrivalTime, int workCnt, Color color) {
 		this.workId = workId;

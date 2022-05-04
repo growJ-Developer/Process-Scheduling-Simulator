@@ -115,11 +115,12 @@
             <TableView fx:id="listTable" editable="true" layoutX="10.0" layoutY="91.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="316.0" prefWidth="485.0" styleClass="listTable">
                <columns>
                   <TableColumn fx:id="processNoColumn" editable="false" prefWidth="44.0" resizable="false" sortable="false" styleClass="column-header" text="No." />
-                  <TableColumn fx:id="arrivalTimeColumn" editable="false" prefWidth="74.0" resizable="false" sortable="false" styleClass="column-header" text="Arrival Time" />
-                  <TableColumn fx:id="burstTimeColumn" editable="false" prefWidth="66.0" resizable="false" sortable="false" styleClass="column-header" text="Burst Time" />
-                  <TableColumn fx:id="waitingTimeColumn" editable="false" prefWidth="84.0" resizable="false" sortable="false" styleClass="column-header" text="Waiting Time" />
-                  <TableColumn fx:id="turnaroundTimeColumn" editable="false" prefWidth="103.0" resizable="false" sortable="false" styleClass="column-header" text="Turnaround Time" />
-                  <TableColumn fx:id="normalizedTimeColumn" editable="false" prefWidth="113.0" resizable="false" sortable="false" styleClass="column-header" text="Normalized Time" />
+                  <TableColumn fx:id="arrivalTimeColumn" editable="false" prefWidth="75.0" resizable="false" sortable="false" styleClass="column-header" text="Arrival Time" />
+                  <TableColumn fx:id="burstTimeColumn" editable="false" prefWidth="82.0" resizable="false" sortable="false" styleClass="column-header" text="WorkCount" />
+                  <TableColumn fx:id="realBurstTimeColumn" editable="false" prefWidth="97.0" resizable="false" sortable="false" styleClass="column-header" text="Burst Time" />
+                  <TableColumn fx:id="waitingTimeColumn" editable="false" prefWidth="67.0" resizable="false" sortable="false" styleClass="column-header" text="WT" />
+                  <TableColumn fx:id="turnaroundTimeColumn" editable="false" prefWidth="59.0" resizable="false" sortable="false" styleClass="column-header" text="TT" />
+                  <TableColumn fx:id="normalizedTimeColumn" editable="false" prefWidth="60.0" resizable="false" sortable="false" styleClass="column-header" text="NTT" />
                </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -199,6 +200,9 @@
                </styleClass>
             </ProgressBar>
             <Label fx:id="nowRunning" layoutX="570.0" layoutY="38.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="40.0" styleClass="nowRunning" />
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="769.0" layoutY="204.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
+            <Text layoutX="780.0" layoutY="221.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Power Consumption" wrappingWidth="160.0" />
+            <Label fx:id="powerConsumption" layoutX="769.0" layoutY="235.0" prefHeight="40.0" prefWidth="170.0" styleClass="powerLabel" text="0W" textAlignment="CENTER" />
          </children>
       </AnchorPane>
    </children>

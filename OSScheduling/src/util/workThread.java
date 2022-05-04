@@ -3,6 +3,9 @@ package util;
 public class workThread extends Thread{
 	public static final int P_CORE_PERFORMANCE = 2;
 	public static final int E_CORE_PERFORMANCE = 1;
+	public static final int P_CORE_POWER = 3;
+	public static final int E_CORE_POWER = 1;
+	
 	private int CORE_PERFORMANCE;
 	private workSection work;
 	
@@ -20,7 +23,6 @@ public class workThread extends Thread{
 	
 	/* 작업을 진행합니다 */
 	public synchronized void run(){
-		System.out.println("!");
 		if(this.work != null) {
 			work.setOverWorkCnt(work.getOverWorkCnt() - CORE_PERFORMANCE);
 		}

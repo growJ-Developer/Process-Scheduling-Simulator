@@ -9,6 +9,15 @@
 
 }
 
+.powerLabel{
+	-fx-border-radius:0.5em;
+	-fx-background-radius:0.5em;
+	-fx-background-color:#28B13E;
+	-fx-text-fill:#ffffff;
+	-fx-text-alignment: center;
+	-fx-alignment:CENTER;
+}
+
 .visualGridPane{
 	-fx-background-color:#ffffff !important;
 }

@@ -16,6 +16,7 @@ public class schedulingTableModel {
 	private final IntegerProperty processNo;
 	private final IntegerProperty arrivalTime;
 	private final IntegerProperty burstTime;
+	private final IntegerProperty realBurstTime;
 	private final IntegerProperty waitingTime;
 	private final IntegerProperty turnaroundTime;
 	private final StringProperty normalizedTime;
@@ -27,6 +28,7 @@ public class schedulingTableModel {
 		this.processNo = new SimpleIntegerProperty();
 		this.arrivalTime = new SimpleIntegerProperty();
 		this.burstTime = new SimpleIntegerProperty();
+		this.realBurstTime = new SimpleIntegerProperty();
 		this.waitingTime = new SimpleIntegerProperty();
 		this.turnaroundTime = new SimpleIntegerProperty();
 		this.normalizedTime = new SimpleStringProperty();
@@ -80,6 +82,14 @@ public class schedulingTableModel {
 
 	public IntegerProperty getBurstTime() {
 		return burstTime;
+	}
+		
+	public void setRealBurstTime(int realBurstTime) {
+		this.realBurstTime.set(realBurstTime);
+	}
+	
+	public IntegerProperty getRealBurstTime() {
+		return realBurstTime;
 	}
 
 	public void setWaitingTime(int waitingTime) {

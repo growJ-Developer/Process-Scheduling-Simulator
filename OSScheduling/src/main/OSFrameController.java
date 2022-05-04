@@ -20,6 +20,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import scheduling.*;
@@ -74,6 +75,7 @@ public class OSFrameController implements Initializable{
 	@FXML private TableColumn<schedulingTableModel, Number> processNoColumn;
 	@FXML private TableColumn<schedulingTableModel, Number> arrivalTimeColumn;
 	@FXML private TableColumn<schedulingTableModel, Number> burstTimeColumn;
+	@FXML private TableColumn<schedulingTableModel, Number> realBurstTimeColumn;
 	@FXML private TableColumn<schedulingTableModel, Number> waitingTimeColumn;
 	@FXML private TableColumn<schedulingTableModel, Number> turnaroundTimeColumn;
 	@FXML private TableColumn<schedulingTableModel, String> normalizedTimeColumn;
@@ -85,6 +87,10 @@ public class OSFrameController implements Initializable{
 	// Gantt Chart
 	@FXML private GridPane ganttPane;	
 	private static GridPane staticGanttPane;
+	
+	// 소비 전력
+	@FXML private Label powerConsumption;
+	private static Label staticPowerConsumption;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -102,6 +108,8 @@ public class OSFrameController implements Initializable{
 		staticProgressBar = progressBar;
 		staticGanttPane = ganttPane;
 		staticStopBtn = stopBtn;
+		staticPowerConsumption = powerConsumption;
+		
 		
 		listTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		
@@ -192,9 +200,11 @@ public class OSFrameController implements Initializable{
 			public void run() {
 				for(schedulingTableModel model : schedulingTableList) {
 					if(model.getProcessNo().get() == work.getWorkId()) {
+						int realBurst = (int) Math.ceil((double) work.getWorkCnt() / (double) coreSet.getWorkByCore());
 						int TT = nowTime - work.getArrivalTime() + 1;
-						int WT = TT - work.getWorkCnt();
-						float NTT = (float) TT / (float) work.getWorkCnt();
+						int WT = TT - realBurst;
+						float NTT = (float) TT / (float) realBurst;
+						model.setRealBurstTime(realBurst);
 						model.setTurnaroundTime(TT);
 						model.setWaitingTime(WT);
 						model.setNormalizedTime(new DecimalFormat("#.00").format(NTT));
@@ -217,6 +227,17 @@ public class OSFrameController implements Initializable{
 					workSection work = readyList.get(index);
 					readyQueueList.add(work);
 				}
+			}
+		});
+	}
+	
+	/* 전력량을 설정합니다 */
+	public void setPowerConsumption(double useEnergy) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println(useEnergy);
+				staticPowerConsumption.setText(new DecimalFormat("#.0").format(useEnergy) + "W");
 			}
 		});
 	}
@@ -279,6 +300,7 @@ public class OSFrameController implements Initializable{
 		});
 		arrivalTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getArrivalTime());
 		burstTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getBurstTime());
+		realBurstTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getRealBurstTime());
 		waitingTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getWaitingTime());
 		turnaroundTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getTurnaroundTime());
 		normalizedTimeColumn.setCellValueFactory(cellData -> cellData.getValue().getNormalizedTime());
@@ -683,7 +705,6 @@ public class OSFrameController implements Initializable{
 				/* 항목이 비어있을 경우에는 Process 텍스트 배경을 설정합니다 */
 				TableRow<schedulingTableModel> tableRow = getTableRow();
 				if(tableRow != null) {
-					schedulingTableModel model = tableRow.getItem();
 					setText("");
 					setStyle("-fx-background-color:" + toRGBCode(Color.WHITE) + " !important;");
 				}	
@@ -691,10 +712,12 @@ public class OSFrameController implements Initializable{
 				TableRow<schedulingTableModel> tableRow = getTableRow();
 				if(tableRow != null) {
 					schedulingTableModel model = tableRow.getItem();
-					setText("P" + model.getProcessNo().get());
-					setTextFill(Color.WHITE);
-					Color color = model.getColor();
-					setStyle("-fx-background-color:" + toRGBCode(color) + " !important;");
+					if(model != null) {
+						setText("P" + model.getProcessNo().get());
+						setTextFill(Color.WHITE);
+						Color color = model.getColor();
+						setStyle("-fx-background-color:" + toRGBCode(color) + " !important;");
+					}
 				}
 			}
 		};

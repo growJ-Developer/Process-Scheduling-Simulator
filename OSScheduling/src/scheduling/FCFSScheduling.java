@@ -17,6 +17,7 @@ public class FCFSScheduling extends scheduling{
 	private coreUtil coreSet;
 	private workSection nowWork;
 	private int nowTime;
+	private double useEnergy = 0;
 	
 	private ArrayList<workThread> pThread;			// 성능 코어 쓰레드
 	private ArrayList<workThread> eThread;			// 효율 코어 쓰레드
@@ -92,23 +93,25 @@ public class FCFSScheduling extends scheduling{
 	/* 작업을 실행합니다 */
 	@Override
 	public void workAction() {
-		try {
-			/* 작업 진행을 쓰레드를 이용하여 처리합니다 */
-			for(workThread pWorker : pThread) {
-				pWorker.setWork(nowWork);
-				pWorker.run();	
+		if(nowWork != null) {
+			try {
+				/* 작업 진행을 쓰레드를 이용하여 처리합니다 */
+				for(workThread pWorker : pThread) {
+					pWorker.setWork(nowWork);
+					pWorker.run();	
+				}
+				for(workThread eWorker : eThread) {
+					eWorker.setWork(nowWork);
+					eWorker.run();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			for(workThread eWorker : eThread) {
-				eWorker.setWork(nowWork);
-				eWorker.run();
+			
+			if(nowWork.getOverWorkCnt() <= 0) {
+				endList.add(nowWork);
+				nowWork = null;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		if(nowWork.getOverWorkCnt() <= 0) {
-			endList.add(nowWork);
-			nowWork = null;
 		}
 		
 		setListTable();

@@ -48,7 +48,7 @@ public class scheduling{
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
-				clear();
+				init();
 			}
 		});
 		mThread.start();
@@ -217,16 +217,6 @@ public class scheduling{
 		return readyQueue;
 	}
 	
-	/* 작업 설정 */
-	public void setWorkSection(PriorityQueue<workSection> workList) {
-		this.workList = workList;
-	}
-	
-	/* TimeQuantum 설정 */
-	public void setTimeQuantum(int timeQuantum) {
-		this.setTimeQuantum(timeQuantum);
-	}
-	
 	/* 전체 작업 반환 */
 	public PriorityQueue<workSection> getWorkSection() {
 		return this.workList;
@@ -242,24 +232,9 @@ public class scheduling{
 		return endList;
 	}
 	
-	/* 작업 진행 설정 */
-	public void setRunning(boolean isRunning) {
-		this.isRunning = isRunning;
-	}
-	
 	/* 작업 진행 여부 반환 */
 	public boolean isRunning() {
 		return this.isRunning;
-	}
-	
-	/* 초기화 -> init() 실행 */
-	public void clear() {
-		init();
-	}
-	
-	/* 코어 정보 설정 */
-	public void setCoreInfo(coreUtil coreSet) {
-		this.coreSet = coreSet;	
 	}
 	
 	/* 코어 정보 반환 */

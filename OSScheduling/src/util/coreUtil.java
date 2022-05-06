@@ -46,7 +46,7 @@ public class coreUtil {
 	
 	/* 대기 전력을 계산하여 반환합니다 */
 	public double getSleepPower() {
-		return (pCoreCnt - usePCoreCnt) + (eCoreCnt - useECoreCnt) * 0.1;
+		return (pCoreCnt - usePCoreCnt) * 0.1 + (eCoreCnt - useECoreCnt) * 0.1;
 	}
 	
 	public int geteCoreCnt() {

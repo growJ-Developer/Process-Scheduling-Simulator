@@ -32,7 +32,7 @@ public class OSFrameController implements Initializable{
 	private static PriorityQueue<workSection> schedulingList = new PriorityQueue<workSection>();		// 스케줄링 리스트
 	private static scheduling scheduling = null;														// 스케줄링 타입
 	private static coreUtil coreSet = new coreUtil(0, 0);
-	private int timeQuantum = 0;
+	private int timeQuantum = 2;
 	private double xOffset = 0;
 	private double yOffset = 0;
 	private Stage stage = null;
@@ -407,10 +407,12 @@ public class OSFrameController implements Initializable{
 		if(!timeQuantumInput.isDisable() && timeQuantumStr.length() <= 0) {
 			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "Please wirte the timeQuantum.");
 			alert.showAlert();
+			timeQuantum = 2;
 			return false;
 		} else if(!timeQuantumInput.isDisable() && Integer.parseInt(timeQuantumStr) <= 0) {
-			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "The timeQuantum must be at least zero.");
+			alertUtil alert = new alertUtil(AlertType.WARNING, "Add Scheduling Warning", "The timeQuantum must be at least one.");
 			alert.showAlert();
+			timeQuantum = 2;
 			return false;
 		} else if(!timeQuantumInput.isDisable()) {
 			timeQuantum = Integer.parseInt(timeQuantumStr);

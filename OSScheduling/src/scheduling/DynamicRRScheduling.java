@@ -27,15 +27,17 @@ public class DynamicRRScheduling extends scheduling{
 	/* 스케줄링 조건에 따라 작업을 설정합니다 */
 	@Override
 	public void setWorkCondition() {
+		nowQuantum++;
+		System.out.println(nowQuantum);
 		/* ReadyQueue에 항목들이 있다면, 남은 시간들을 비교합니다 */
 		if (nowQuantum % timeQuantum == 0 || nowWork == null) {
 			nowWork = getBestWork();
 			/* 3번째 아이디어 현재하는 일을 실시간 반영해서 남은일이랑 timeQuantum비교해서 증감 대신에 한계선은 존재함 */
 			int leftover = nowWork.getOverWorkCnt();
-			if (leftover >= this.timeQuantum && this.timeQuantum < 10)
-				this.timeQuantum++;
-			else if (leftover < this.timeQuantum && this.timeQuantum > 2)
-				this.timeQuantum--;
+			if (leftover >= timeQuantum && timeQuantum < 10)
+				timeQuantum++;
+			else if (leftover < timeQuantum && timeQuantum > 2)
+				timeQuantum--;
 			nowQuantum = 0;
 		}
 	}

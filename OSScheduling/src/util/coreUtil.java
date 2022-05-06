@@ -25,7 +25,7 @@ public class coreUtil {
 		
 		/* P 코어의 개수를 측정합니다 */
 		for(int index = 1; index <= pCoreCnt; index++) {
-			if((overWorkCnt - workThread.P_CORE_PERFORMANCE) >= 0) {
+			if((overWorkCnt) >= 0) {
 				overWorkCnt -= workThread.P_CORE_PERFORMANCE;
 				usePCoreCnt = index;
 			} else {
@@ -46,7 +46,7 @@ public class coreUtil {
 	
 	/* 대기 전력을 계산하여 반환합니다 */
 	public double getSleepPower() {
-		return (pCoreCnt - usePCoreCnt) + (eCoreCnt - useECoreCnt) * 0.1;
+		return (pCoreCnt - usePCoreCnt) * 0.1 + (eCoreCnt - useECoreCnt) * 0.1;
 	}
 	
 	public int geteCoreCnt() {

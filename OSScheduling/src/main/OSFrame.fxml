@@ -151,7 +151,7 @@
             <Text layoutX="580.0" layoutY="337.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Time Quantum" wrappingWidth="100.21630859375" />
             <Line endX="-29.0" endY="336.0" layoutX="778.0" layoutY="67.0" startX="-29.0" startY="22.0" />
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="25.0" layoutX="769.0" layoutY="89.0" stroke="BLACK" strokeType="INSIDE" styleClass="horizonBar" width="5.0" />
-            <Text layoutX="779.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Arrival Time" wrappingWidth="100.21630859375" />
+            <Text layoutX="779.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="subTitleText" text="Core Setup" wrappingWidth="100.21630859375" />
             <Button fx:id="startBtn" layoutX="770.0" layoutY="352.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" styleClass="btn-info" text="Start" />
             <SplitMenuButton fx:id="schedulingTypeSelect" layoutX="570.0" layoutY="118.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="160.0" text="FCFS">
               <items>

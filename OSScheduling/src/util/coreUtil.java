@@ -25,7 +25,7 @@ public class coreUtil {
 		
 		/* P 코어의 개수를 측정합니다 */
 		for(int index = 1; index <= pCoreCnt; index++) {
-			if((overWorkCnt) >= 0) {
+			if(overWorkCnt >= 0) {
 				overWorkCnt -= workThread.P_CORE_PERFORMANCE;
 				usePCoreCnt = index;
 			} else {

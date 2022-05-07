@@ -132,9 +132,6 @@ public class scheduling{
 				/* 작업의 양을 통해 쓰레드의 수량을 측정합니다 */
 				coreSet.getUseCount(nowWork);
 				
-				System.out.println(coreSet.getUsePCoreCnt());
-				System.out.println(coreSet.getUseECoreCnt());
-				
 				/* PCore 쓰레드 실행 */
 				for(int index = 0; index < coreSet.getUsePCoreCnt(); index++) {
 					pThread.get(index).setWork(nowWork);
@@ -162,7 +159,6 @@ public class scheduling{
 				e.printStackTrace();
 			}
 		}
-		
 		setListTable();
 	}
 	

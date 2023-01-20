@@ -10,9 +10,9 @@
 
 #### 🙋🏻‍♂️ 멤버 구성
  - 장성용(팀장): 프로젝트 설계, 공용 프레임 및 컴포넌트 제작, UI 디자인 작업
- - 박윤서: SRTN 알고리즘 스케쥴링 코드 작성
- - 임성우: HRRN 알고리즘 스케쥴링 코드 작성
- - 양정훈: Round Robin, SPN 알고리즘 스케쥴링 코드 작성
+ - [박윤서](https://github.com/wndrksdl): SRTN 알고리즘 스케쥴링 코드 작성
+ - [임성우](https://github.com/imseongwoo): HRRN 알고리즘 스케쥴링 코드 작성
+ - [양정훈](https://github.com/YangJunghoon): Round Robin, SPN 알고리즘 스케쥴링 코드 작성
 
 #### 🖥️ 개발 환경
  - `Java 18.0 (Zulu Java with JavaFX)`
